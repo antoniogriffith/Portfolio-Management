@@ -120,7 +120,7 @@ def negative_sharpe(weights):
 #
 # initial guess for the portfolio weights. Typically we start with equal weights as an initial guess
 #
-initial_guess = [(1/numOfAssets) for x in range(numOfAssets)]
+initial_guess = [1/numOfAssets for x in range(numOfAssets)]
 
 #
 # portfolio constraint: summation of weights should be 1
@@ -136,5 +136,5 @@ bnds = tuple((0,1) for x in range(numOfAssets))
 # now we are ready to use the minimization function
 # if you are leaving the arguments to "none", then you don't need to include them
 #
-opt_MVE = sco.minimize(negative_sharpe, initial_guess, bounds=bnds, constraints=cons)
+opt_MVE = sco.minimize(negative_sharpe, initial_guess, method='SLSQP', bounds=bnds, constraints=cons)
 print(opt_MVE)

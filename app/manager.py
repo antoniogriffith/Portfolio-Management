@@ -101,3 +101,40 @@ VarCov = rets.cov() * 52
 # pre-set the risk-free rate to be 1% per year and store it in the variable "rf"
 #
 rf = 0.01
+
+
+#**************************************************************************
+#***************                 BLOCK 4                       ************
+#**************************************************************************
+#**************************************************************************
+
+#
+# define a function that returns the negative Sharpe ratio if you pass the portfolio weights to the function
+#
+def negative_sharpe(weights):
+    weights = np.array(weights)
+    pret = np.dot(weights, mu)
+    pvol = np.sqrt(np.dot(weights, np.dot(VarCov, weights.T)))
+    return -(pret-rf)/pvol
+
+#
+# initial guess for the portfolio weights. Typically we start with equal weights as an initial guess
+#
+initial_guess = [(1/numOfAssets) for x in range(numOfAssets)]
+
+#
+# portfolio constraint: summation of weights should be 1
+#
+cons = ({'type': 'eq', 'fun': lambda weights: np.sum(weights) - 1})
+
+#
+# impose additional constraint: does not allow short sale, i.e. all the individual weights between 0 and 1
+#
+bnds = tuple((0,1) for x in range(numOfAssets))
+
+#
+# now we are ready to use the minimization function
+# if you are leaving the arguments to "none", then you don't need to include them
+#
+opt_MVE = sco.minimize(negative_sharpe, initial_guess, bounds=bnds, constraints=cons)
+print(opt_MVE)

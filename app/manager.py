@@ -27,7 +27,8 @@ import pandas as pd
 #
 # pd.options.display customizes the display options for datasets
 #
-pd.set_option("display.max_rows", None, "display.max_columns", None)
+pd.options.display.max_seq_items = 10
+pd.options.display.max_rows = 10
 
 #
 # yfinance is a third party package that allows downloading some data from Yahoo Finance firectly;
@@ -95,13 +96,11 @@ mu = rets.mean() * 52
 # from quarterly to annual, multiply quarterly by 4
 #
 VarCov = rets.cov() * 52
-print(VarCov)
 
 #
 # pre-set the risk-free rate to be 1% per year and store it in the variable "rf"
 #
 rf = 0.01
-
 
 
 #**************************************************************************
@@ -137,6 +136,60 @@ bnds = tuple((0,1) for x in range(numOfAssets))
 # now we are ready to use the minimization function
 # if you are leaving the arguments to "none", then you don't need to include them
 #
-
 opt_mve = sco.minimize(negative_sharpe, initial_guess, bounds=bnds, constraints=cons)
-print(opt_mve)
+
+#
+# to extract the optimal portfolio weights, call it through 'x'
+#
+mve_weights = opt_mve['x']
+
+def to_Percentage(num):
+    '''
+        Params: Number in Decimal Format
+    '''
+    newNum = round(num * 100, 2)
+    toString = str(newNum) + "%"
+    return toString
+
+index = 0
+stockWeights = {}
+for stock in tickers:
+    stockWeights[tickers[index]] = to_Percentage(mve_weights[index])
+    index += 1
+
+for item in stockWeights:
+    stockWeights[item] = float(stockWeights[item].replace('%', ""))
+    if stockWeights[item] > 0:
+        print(item.rjust(8), "  ", str(stockWeights[item]) + "%")
+
+
+sum = 0
+for item in stockWeights:
+    weightsToAdd = stockWeights[item]
+    sum += weightsToAdd
+    sum = str(sum)
+    sum += "%"
+print("The sum of the individual security weights in the portfolio is ", sum)
+
+#
+# calculate the MVE portfolio's expected return
+#
+mve_ret = np.dot(mve_weights, mu)
+print("The MVE portfolio's expected return is ", to_Percentage(mve_ret))
+
+
+#
+# calculate the return volatility for the MVE portfolio
+#
+mve_vol = np.sqrt(np.dot(mve_weights, np.dot(VarCov, mve_weights.T)))
+print("The MVE portfolio's expected volatility is ", to_Percentage(mve_vol))
+
+#
+# Sharpe Ratio for individual securities
+#
+print((rets.mean()*252-rf)/(np.sqrt(252)*rets.std()))
+
+# plots the MVE portfolio's returns over the sample period
+pd.DataFrame(np.dot(rets, mve_weights), columns = ['MVE Portfolio Return'], index = rets.index).cumsum().plot(figsize = (30,15))
+
+pd.DataFrame(np.dot(rets,mve_weights), columns = ['MVE Portfolio Return'], index = rets.index).dropna().mean()*252

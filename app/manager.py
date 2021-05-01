@@ -27,8 +27,7 @@ import pandas as pd
 #
 # pd.options.display customizes the display options for datasets
 #
-pd.options.display.max_seq_items = 10
-pd.options.display.max_rows = 10
+pd.set_option("display.max_rows", None, "display.max_columns", None)
 
 #
 # yfinance is a third party package that allows downloading some data from Yahoo Finance firectly;
@@ -76,7 +75,7 @@ price_data.sort_index()
 rets = np.log(price_data / price_data.shift(1))
 
 # Plot the individual securities' returns in the sample period
-rets.cumsum().plot()
+rets.cumsum().plot(figsize=(30,15))
 
 #**************************************************************************
 #***************                 BLOCK 3                       ************
@@ -96,11 +95,13 @@ mu = rets.mean() * 52
 # from quarterly to annual, multiply quarterly by 4
 #
 VarCov = rets.cov() * 52
+print(VarCov)
 
 #
 # pre-set the risk-free rate to be 1% per year and store it in the variable "rf"
 #
 rf = 0.01
+
 
 
 #**************************************************************************
@@ -136,5 +137,6 @@ bnds = tuple((0,1) for x in range(numOfAssets))
 # now we are ready to use the minimization function
 # if you are leaving the arguments to "none", then you don't need to include them
 #
-opt_MVE = sco.minimize(negative_sharpe, initial_guess, method='SLSQP', bounds=bnds, constraints=cons)
-print(opt_MVE)
+
+opt_mve = sco.minimize(negative_sharpe, initial_guess, bounds=bnds, constraints=cons)
+print(opt_mve)

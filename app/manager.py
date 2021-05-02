@@ -88,19 +88,19 @@ rets.cumsum().plot(figsize=(30,15))
 # from monthly to annaul, multiply monthly by 12
 # from quarterly to annual, multuply quarterly by 4
 #
-mu = rets.mean() * 52
+mu = rets.mean() * 252
 
 #
 # from daily variance-covariance to annuak variance-covariance, multiply the daily version by 252
 # from monthly to annual, multiply by 12
 # from quarterly to annual, multiply quarterly by 4
 #
-VarCov = rets.cov() * 52
+VarCov = rets.cov() * 252
 
 #
 # pre-set the risk-free rate to be 1% per year and store it in the variable "rf"
 #
-rf = 0.01
+rf = 0.02
 
 
 #**************************************************************************
@@ -198,3 +198,14 @@ print((rets.mean()*252-rf)/(np.sqrt(252)*rets.std()))
 pd.DataFrame(np.dot(rets, mve_weights), columns = ['MVE Portfolio Return'], index = rets.index).cumsum().plot(figsize = (30,15))
 
 pd.DataFrame(np.dot(rets,mve_weights), columns = ['MVE Portfolio Return'], index = rets.index).dropna().mean()*252
+
+
+#**************************************************************************
+#***************                 BLOCK 5                       ************
+#*****************        OUT OF SAMPLE ANALYSIS          *****************
+#**************************************************************************
+
+#
+# download the out of sample data from 2019-01-01 to 2019-12-31
+#
+#out_raw = yf.download(symbols, start = "2019-01-01", end = "2019-12-31")

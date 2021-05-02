@@ -143,6 +143,11 @@ opt_mve = sco.minimize(negative_sharpe, initial_guess, bounds=bnds, constraints=
 #
 mve_weights = opt_mve['x']
 
+sharpeRatio = negative_sharpe(mve_weights)*-1
+
+print("\nSharpe Ratio: ", sharpeRatio, "\n")
+
+
 def to_Percentage(num):
     '''
         Params: Number in Decimal Format
@@ -167,26 +172,26 @@ sum = 0
 for item in stockWeights:
     weightsToAdd = stockWeights[item]
     sum += weightsToAdd
-    sum = str(sum)
-    sum += "%"
-print("The sum of the individual security weights in the portfolio is ", sum)
+print("\nThe sum of the individual security weights in the portfolio is ", sum)
 
 #
 # calculate the MVE portfolio's expected return
 #
 mve_ret = np.dot(mve_weights, mu)
-print("The MVE portfolio's expected return is ", to_Percentage(mve_ret))
+print("\nThe MVE portfolio's expected return is ", to_Percentage(mve_ret))
 
 
 #
 # calculate the return volatility for the MVE portfolio
 #
 mve_vol = np.sqrt(np.dot(mve_weights, np.dot(VarCov, mve_weights.T)))
-print("The MVE portfolio's expected volatility is ", to_Percentage(mve_vol))
+print("\nThe MVE portfolio's expected volatility is ", to_Percentage(mve_vol))
 
 #
 # Sharpe Ratio for individual securities
 #
+
+print("\nThe Sharpe Ratio for the individual securities is as follows:\n\n")
 print((rets.mean()*252-rf)/(np.sqrt(252)*rets.std()))
 
 # plots the MVE portfolio's returns over the sample period

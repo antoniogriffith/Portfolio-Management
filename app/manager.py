@@ -104,33 +104,39 @@ print(
 ifIntegrative = ['integrative', 'int', 'i']
 ifSpeculative = ['speculative', 'spec', 's']
 ifHolistic = ['holistic', 'hol', 'h']
+status = False
 
 while True:
 
     invApproach = input("Please enter 'Integrative', 'Speculative' or 'Holistic': ")
     invApproach = invApproach.lower()
 
+    if invApproach in ifHolistic:
+        invApproach = 'Holistic'
+        status = True
+    
     if invApproach in ifIntegrative:
-        print("\nYou have selected the integrative approach.")
-        break
+        invApproach = 'Integrative'
+        status = True
 
     if invApproach in ifSpeculative:
-        print("\nYou have selected the speculative approach.")
+        invApproach = 'Speculative'
+        status = True
+
+    if status == True:
+        confirmation = f"\nYou have selected the {invApproach} approach."
+        print(confirmation)
         break
 
-    if invApproach in ifHolistic:
-        print("\nYou have selected the holistic approach.")
-        break
-
-    print("ERROR: Invalid entry. Try again!")
+    print("ERROR: Invalid entry. Try again!\n")
 
 # Investor Risk Tolerance
-print('''
+print(f'''
 
                                                     INVESTMENT STRATEGY
 
 
-        In order for us to determine an investment strategy, we must first know the investor's risk tolerance.
+        In order for us to determine an investment strategy for the {invApproach} approach, we must first know your risk tolerance.
 
                 Aggressive: Maximizing returns by taking a high degree of risk. This strategy will focus on capital appreciation
                             by recommending the purchase of what are commonly know as "high-growth" stocks and the liquidation of stocks
@@ -148,6 +154,43 @@ print('''
                             considerably lower under this strategy.
 
         ''')
+
+ifAggressive = ['aggressive', 'a']
+ifModerate = ['moderate', 'm']
+ifConservative = ['conservatice', 'c']
+status = False
+
+while True:
+    risk_tolerance = input("Please select an investment strategy. Enter 'Aggressive', 'Moderate, or 'Conservative': ")
+    risk_tolerance = risk_tolerance.lower()
+
+    if (risk_tolerance == 'quit'):
+        print("Exiting program now. Please come back soon! Goodbye...\n")
+        quit()
+
+    if risk_tolerance in ifAggressive:
+        risk_tolerance = 'Aggressive'
+        status = True
+
+    if risk_tolerance in ifModerate:
+        risk_tolerance = 'Moderate'
+        status = True
+
+    if risk_tolerance in ifConservative:
+        risk_tolerance = 'Conservative'
+        status = True
+
+    if status == True:
+        confirmation = f"\nYou have selected the {risk_tolerance} approach."
+        print(confirmation)
+        break
+
+    print("ERROR: Invalid entry. Try again!\n")
+
+#**************************************************************************
+#***********                       Module 3                       *********
+#***************     Data Retrieval of User's Stock Selection   ***********
+#**************************************************************************
 
 
 

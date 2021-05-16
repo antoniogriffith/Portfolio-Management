@@ -56,12 +56,51 @@ def negative_sharpe(weights):
         Purpose: To construct a portfolio which maximizes the Sharpe ratio (or, more precisely, minimizes the negative Sharpe ratio) of a portfolio.
 
         Params: A numpy array containing portfolio 'weights'.
-
     '''
     weights = np.array(weights)
     pret = np.dot(weights, mu)
     pvol = np.sqrt(np.dot(weights, np.dot(VarCov, weights.T)))
     return -(pret-rf)/pvol
+
+def from_CSV(path):
+    '''
+        Purpose: Reads a CSV from a user local drive at a path they have specified.
+
+        Parameters: A string containing complete path to CSV file. Stocks must be indicated 
+                    by their ticker within CSV must be under the header 'Ticker'
+
+        Returns: A list variable containing series of stock tickers.
+    '''
+
+    #
+    # read the stock data, portfolio_stocks.csv, into Python and store it in a variable "stocks"
+    #
+    stocks = pd.read_csv(path)
+
+    # creating dictionary with which to store raw company data
+    symbols = {}
+    index = 0
+    for company in stocks["Ticker"]:
+        symbols[company] = stocks["Ticker"][index]
+        index += 1
+
+    numOfAssets = len(symbols)
+    tickers = list(symbols.values())
+
+    return tickers
+
+def stock_entry():
+    ''' 
+        Purpose: Extracts user ticker information either manually or via CSV upload/
+
+        Parameters: None
+
+        Returns: A list variable containing series of stock tickers.
+    '''
+
+
+
+
 
 #**************************************************************************
 #***************                  Module 1                      ***********
@@ -194,20 +233,7 @@ while True:
 
 
 
-#
-# read the stock data, portfolio_stocks.csv, into Python and store it in a variable "stocks"
-#
-stocks = pd.read_csv("/Users/antoniogriffith-keaton/Documents/GU Docs/FINC 241/Group Project/Data/portfolio_stocks.csv")
 
-# creating dictionary with which to store raw company data
-symbols = {}
-index = 0
-for company in stocks["Company Name"]:
-    symbols[company] = stocks["Ticker"][index]
-    index += 1
-
-numOfAssets = len(symbols)
-tickers = list(symbols.values())
 
 #
 # yf.download function retrieves daily prices for a list of securities in a batch and convert that to a Dataframe
@@ -220,6 +246,24 @@ price_data = raw['Adj Close']
 
 # sort price_data by date in case the price_data was not sorted properly by date
 price_data.sort_index()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 attempts = 0
 while attempts < 4:

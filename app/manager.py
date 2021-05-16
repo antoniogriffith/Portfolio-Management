@@ -36,6 +36,18 @@ pd.options.display.max_rows = 10
 # 
 import yfinance as yf
 
+# Custom Functions
+
+def to_Percentage(num):
+    '''
+        Params: Number in Decimal Format
+    '''
+    newNum = round(num * 100, 2)
+    toString = str(newNum) + "%"
+    return toString
+
+
+
 #**************************************************************************
 #***************                  BLOCK 2                       ***********
 #**************************************************************************
@@ -68,6 +80,34 @@ price_data = raw['Adj Close']
 # sort price_data by date in case the price_data was not sorted properly by date
 price_data.sort_index()
 
+attempts = 0
+while attempts < 4:
+    timingChoice = input("\nConstruct portfolio using daily, monthly, or quarterly: ")
+    timingChoice = timingChoice.lower()
+
+    byDay = ["daily", "day", "d"]
+    byMonth = ["monthly", "month", "m"]
+    byQuarter = ["quarterly", "quarter", "q"]
+
+    if timingChoice in byDay:
+        timing = 252
+        break
+    elif timingChoice in byMonth:
+        timing = 12
+        price_data = price_data.resample(rule = 'm', label = 'right').last()
+        break
+    elif timingChoice in byQuarter:
+        timing = 4
+        price_data = price_data.resample(rule = 'q', label = 'right').last()
+        break
+    else:
+        print("\nERROR: Invalid Entry. Please enter 'daily', 'monthly', or 'quarterly': ")
+    attempts += 1
+
+if (attempts == 4):
+    print("\nMaximum Attemps Reached: Exiting now. Goodbye...\n")
+    quit()
+
 #
 # generate log-returns or continuously compounded returns for all securities and store them in dataframe "rets"
 # we use the "shift" method in the calculation
@@ -75,8 +115,10 @@ price_data.sort_index()
 #
 rets = np.log(price_data / price_data.shift(1))
 
+
 # Plot the individual securities' returns in the sample period
 rets.cumsum().plot(figsize=(30,15))
+
 
 #**************************************************************************
 #***************                 BLOCK 3                       ************
@@ -88,19 +130,26 @@ rets.cumsum().plot(figsize=(30,15))
 # from monthly to annaul, multiply monthly by 12
 # from quarterly to annual, multuply quarterly by 4
 #
-mu = rets.mean() * 252
+mu = rets.mean() * timing
 
 #
 # from daily variance-covariance to annuak variance-covariance, multiply the daily version by 252
 # from monthly to annual, multiply by 12
 # from quarterly to annual, multiply quarterly by 4
 #
-VarCov = rets.cov() * 252
+VarCov = rets.cov() * timing
 
 #
-# pre-set the risk-free rate to be 1% per year and store it in the variable "rf"
+# dynamically setting the risk-free rate via Yahoo Finance library and storing it in the variable "rf"
 #
-rf = 0.02
+print("\n---------------------------------------------------------")
+print("\nNow Collecting U.S. Treasury Data to Determine Risk-Free Rate:")
+riskFree = yf.download("^IRX", start = "2014-01-01", end = "2018-12-31")
+rf_prices = riskFree["Adj Close"]
+averageRF = rf_prices.mean()
+print("\nAverage 3-Month T-Bill Rate:", to_Percentage(averageRF/100))
+rf = averageRF/100
+print("\n---------------------------------------------------------")
 
 
 #**************************************************************************
@@ -143,18 +192,13 @@ opt_mve = sco.minimize(negative_sharpe, initial_guess, bounds=bnds, constraints=
 #
 mve_weights = opt_mve['x']
 
-sharpeRatio = negative_sharpe(mve_weights)*-1
+sharpeRatio = -negative_sharpe(mve_weights)
 
-print("\nSharpe Ratio: ", sharpeRatio, "\n")
+sharpeRatio = round(sharpeRatio, 3)
 
+print("\nSharpe Ratio of the MVE Portfolio: ", sharpeRatio, "\n")
 
-def to_Percentage(num):
-    '''
-        Params: Number in Decimal Format
-    '''
-    newNum = round(num * 100, 2)
-    toString = str(newNum) + "%"
-    return toString
+print("---------------------------------------------------------\n")
 
 index = 0
 stockWeights = {}
@@ -167,18 +211,15 @@ for item in stockWeights:
     if stockWeights[item] > 0:
         print(item.rjust(8), "  ", str(stockWeights[item]) + "%")
 
-
-sum = 0
-for item in stockWeights:
-    weightsToAdd = stockWeights[item]
-    sum += weightsToAdd
-print("\nThe sum of the individual security weights in the portfolio is ", sum)
+print("\n---------------------------------------------------------")
 
 #
 # calculate the MVE portfolio's expected return
 #
 mve_ret = np.dot(mve_weights, mu)
 print("\nThe MVE portfolio's expected return is ", to_Percentage(mve_ret))
+
+print("\n---------------------------------------------------------")
 
 
 #
@@ -187,11 +228,14 @@ print("\nThe MVE portfolio's expected return is ", to_Percentage(mve_ret))
 mve_vol = np.sqrt(np.dot(mve_weights, np.dot(VarCov, mve_weights.T)))
 print("\nThe MVE portfolio's expected volatility is ", to_Percentage(mve_vol))
 
+
+print("\n---------------------------------------------------------")
+
 #
 # Sharpe Ratio for individual securities
 #
 
-print("\nThe Sharpe Ratio for the individual securities is as follows:\n\n")
+print("\nThe Sharpe Ratios for the individual securities are as follows: \n")
 print((rets.mean()*252-rf)/(np.sqrt(252)*rets.std()))
 
 # plots the MVE portfolio's returns over the sample period
@@ -208,4 +252,84 @@ pd.DataFrame(np.dot(rets,mve_weights), columns = ['MVE Portfolio Return'], index
 #
 # download the out of sample data from 2019-01-01 to 2019-12-31
 #
-#out_raw = yf.download(symbols, start = "2019-01-01", end = "2019-12-31")
+
+print("\n\n---------------------------------------------------------")
+
+
+print("\nOutputing 'Out Of Sample' Analysis Now:")
+out_raw = yf.download(tickers, start = "2019-01-01", end = "2019-12-31")
+
+# extract the adjusted closing prices and store them in a variable named out_price_data
+out_price_data = out_raw['Adj Close']
+out_price_data
+
+if timingChoice in byMonth:
+    out_price_data = out_price_data.resample(rule = 'm', label = 'right').last()
+
+elif timingChoice in byQuarter:
+    out_price_data = out_price_data.resample(rule = 'q', label = 'right').last()
+
+#
+# generate out of sample returns
+#
+out_rets = np.log(out_price_data / out_price_data.shift(1))
+
+
+#
+# Out of sample average returns
+#
+# from daily return to annual return, multiply the daily return by 252
+# from monthly to annaul, multiply monthly by 12
+# from quarterly to annual, multuply quarterly by 4
+#
+out_mu = out_rets.mean() * timing
+
+
+#
+# Out of sample variance-covariance matrix
+#
+# from daily variance-covariance to annuak variance-covariance, multiply the daily version by 252
+# from monthly to annual, multiply by 12
+# from quarterly to annual, multiply quarterly by 4
+#
+out_VarCov = out_rets.cov() * timing
+
+#
+# calculate the out of sample return for the MVE portfolio
+#
+out_mve_ret = np.dot(mve_weights, out_mu)
+out_mve_vol = np.sqrt(np.dot(mve_weights, np.dot(out_VarCov, mve_weights.T)))
+out_mve_sharpe = (out_mve_ret - rf)/out_mve_vol
+
+#
+# out of sample Sharpe ratio for the MVE portfolio
+#
+
+print("\n---------------------------------------------------------\n")
+out_mve_sharpe = round(out_mve_sharpe, 3)
+outMVESharpeStr = f"The MVE Portfolio's 'Out of Sample' Sharpe Ratio is {out_mve_sharpe}."
+print(outMVESharpeStr)
+
+#
+# calculate the out of sample return volatility for the MVE portfolio
+#
+print("\n---------------------------------------------------------\n")
+out_mve_ret = to_Percentage(out_mve_ret)
+outMVERetStr = f"The MVE Portfolio's 'Out of Sample' Return is {out_mve_ret}."
+print(outMVERetStr)
+
+print("\n---------------------------------------------------------\n")
+
+#
+# calculate the out of sample return volatility for the MVE portfolio
+#
+out_mve_vol = to_Percentage(out_mve_vol)
+outMVEVolStr = f"\n The MVE Portfolio's 'Out of Sample' Volatility is {out_mve_vol}"
+print(outMVEVolStr)
+
+print("\n---------------------------------------------------------\n")
+#
+# out of sample Sharpe ratio for the individual securities 
+#
+print("\nThe Sharpe Ratios for the individual securities in the 'Out of Sample' period are as follows: \n")
+print((out_rets.mean() * 252 - rf)/(np.sqrt(252) * out_rets.std()))

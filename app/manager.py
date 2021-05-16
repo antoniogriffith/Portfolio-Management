@@ -35,6 +35,8 @@ pd.options.display.max_rows = 10
 # 
 import yfinance as yf
 
+import csv
+
 
 #**************************************************************************
 #***********    Custom Functions (Modular Program Approach)    ************
@@ -62,7 +64,7 @@ def negative_sharpe(weights):
     pvol = np.sqrt(np.dot(weights, np.dot(VarCov, weights.T)))
     return -(pret-rf)/pvol
 
-def from_CSV(path):
+def from_CSV(filePath):
     '''
         Purpose: Reads a CSV from a user local drive at a path they have specified.
 
@@ -75,9 +77,9 @@ def from_CSV(path):
     #
     # read the stock data, portfolio_stocks.csv, into Python and store it in a variable "stocks"
     #
-    stocks = pd.read_csv(path)
+    stocks = pd.read_csv(filePath)
 
-    # creating dictionary with which to store raw company data
+# creating dictionary with which to store raw company data
     symbols = {}
     index = 0
     for company in stocks["Ticker"]:
@@ -89,7 +91,7 @@ def from_CSV(path):
 
     return tickers
 
-def stock_entry():
+def stock_upload():
     ''' 
         Purpose: Extracts user ticker information either manually or via CSV upload/
 
@@ -97,10 +99,101 @@ def stock_entry():
 
         Returns: A list variable containing series of stock tickers.
     '''
+    while True:
+        uploadForm = input("\nWould you like to provide your current portfolio manually or upload a CSV? Please enter 'manual' or 'upload': ")
+        uploadForm = uploadForm.lower()
+
+        if uploadForm == 'quit':
+            print("Exiting program now. Please come back soon! Goodbye...\n")
+            quit()
+        
+        elif uploadForm == 'manual' or uploadForm == 'upload':
+            break
+
+        else:
+             print("ERROR: Invalid entry. Try again!\n")
 
 
+    if uploadForm == 'upload':
+        print(
+            '''
+            Note: In order for the CSV to be processed correctly, stocks must be indicated 
+                  by their symbol under the header 'Ticker' in the file.
+            ''')
+
+        filePath = input("Please specify the file path: ")
+        tickers = from_CSV(filePath)
+
+    if uploadForm == 'manual':
+        tickers = stock_entry()
+
+    return tickers
+
+def stock_entry():
+        '''
+            Purpose: Provides a framework for the manual entry of stock symbols.
+
+            Params: None
+
+            Returns: A list variable containing series of stock tickers.
+
+        '''
+        tickers = []
+        while True:
+            symbol = input("\nPlease enter stock symbol or enter 'quit' to exit: ")
+            symbol = symbol.upper()
+
+            if(symbol == 'QUIT'):
+                print("Exiting program now. Please come back soon! Goodbye...\n")
+                quit()
+
+            elif (symbol in tickers):
+                print("\nYou have already entered this symbol!")
+
+                multipleEntries = input("\nWould you like to enter another stock? Enter 'yes' or 'no': ")
+                multipleEntries = multipleEntries.upper()
+
+                while (multipleEntries != "YES" and multipleEntries != "NO"):
+                    print("\nINVALID  ENTRY! Please try again!")
+                    multipleEntries = input("Would you like to enter another stock? Enter 'yes' or 'no': ")
+                    multipleEntries = multipleEntries.upper()
+
+                if (multipleEntries == "NO"):
+                    break
+        
+            else:
+                if (len(symbol) > 5 or  (symbol.isalpha() == False  and "." not in symbol)): # Stock symbols can contain periods!
+                    print("Oh, expecting a properly-formed stock symbol like 'MSFT'.\n")
+                else:
+                    tickers.append(symbol)
 
 
+            multipleEntries = input("\nWould you like to enter another stock? Enter 'yes' or 'no': ")
+            multipleEntries = multipleEntries.upper()
+
+            while (multipleEntries != "YES" and multipleEntries != "NO"):
+                print("\nINVALID  ENTRY! Please try again!")
+                multipleEntries = input("Would you like to enter another stock? Enter 'yes' or 'no': ")
+                multipleEntries = multipleEntries.upper()
+
+            if (multipleEntries == "NO"):
+                if not tickers:
+                    emptyListCheck = input("No valid data has been entered. Are you sure? Please enter 'yes' or 'no': ")
+                    emptyListCheck = emptyListCheck.upper()
+
+                    while (emptyListCheck != "YES" and emptyListCheck != "NO"):
+                        print("\nINVALID  ENTRY! Please try again!")
+                        emptyListCheck = input("No valid data has been entered. Are you sure? Please enter 'yes' or 'no': ")
+                        emptyListCheck = emptyListCheck.upper()
+
+                    if (emptyListCheck == 'YES'):
+                        print("Exiting program now. Please come back soon! Goodbye...\n")
+                        quit()
+
+                elif (len(tickers) > 0 ):
+                    break   
+            
+        return tickers
 
 #**************************************************************************
 #***************                  Module 1                      ***********
@@ -150,6 +243,10 @@ while True:
     invApproach = input("Please enter 'Integrative', 'Speculative' or 'Holistic': ")
     invApproach = invApproach.lower()
 
+    if (invApproach == 'quit'):
+        print("Exiting program now. Please come back soon! Goodbye...\n")
+        quit()
+
     if invApproach in ifHolistic:
         invApproach = 'Holistic'
         status = True
@@ -196,7 +293,7 @@ print(f'''
 
 ifAggressive = ['aggressive', 'a']
 ifModerate = ['moderate', 'm']
-ifConservative = ['conservatice', 'c']
+ifConservative = ['conservative', 'c']
 status = False
 
 while True:
@@ -231,9 +328,7 @@ while True:
 #***************     Data Retrieval of User's Stock Selection   ***********
 #**************************************************************************
 
-
-
-
+tickers = stock_upload()
 
 #
 # yf.download function retrieves daily prices for a list of securities in a batch and convert that to a Dataframe
@@ -248,7 +343,7 @@ price_data = raw['Adj Close']
 price_data.sort_index()
 
 
-
+numOfAssets = len(tickers)
 
 
 

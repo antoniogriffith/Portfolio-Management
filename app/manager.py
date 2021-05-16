@@ -1,8 +1,7 @@
 # this is the "app/manager.py" file
 
-
 #**************************************************************************
-#***************                  BLOCK 1                      ************
+#***************      Importation of Python Libraries             *********
 #**************************************************************************
 #**************************************************************************
 
@@ -36,22 +35,121 @@ pd.options.display.max_rows = 10
 # 
 import yfinance as yf
 
-# Custom Functions
+
+#**************************************************************************
+#***********    Custom Functions (Modular Program Approach)    ************
+#**************************************************************************
+#**************************************************************************
 
 def to_Percentage(num):
     '''
-        Params: Number in Decimal Format
+        Purpose: To convert some number to a percent. Appends the '%' sign. Outputs a String.
+        
+        Params: Number of Type Int or Float 
     '''
     newNum = round(num * 100, 2)
     toString = str(newNum) + "%"
     return toString
 
+def negative_sharpe(weights):
+    '''
+        Purpose: To construct a portfolio which maximizes the Sharpe ratio (or, more precisely, minimizes the negative Sharpe ratio) of a portfolio.
+
+        Params: A numpy array containing portfolio 'weights'.
+
+    '''
+    weights = np.array(weights)
+    pret = np.dot(weights, mu)
+    pvol = np.sqrt(np.dot(weights, np.dot(VarCov, weights.T)))
+    return -(pret-rf)/pvol
+
+#**************************************************************************
+#***************                  Module 1                      ***********
+#********************  Introduction to the Application  *******************
+#**************************************************************************
+
+#Welcome Message
+print("\n\nWelcome to Planalytics LLC. Securities Manangement Software!")
+print(
+'''
+The following program will recieve an entry of one or more stock tickers
+(ex, IBM, AAPL, MSFT) and produce a Buy, Sell, or Hold recommendation for each.
+
+The historical data (from the previous 100 days) will be written to a .csv file
+corresponding to each stock entered.
+
+Please be sure to enter an accurate symbol to avoid receiving an error message.
+
+-——————————————————————————————————————————————————————————————————————————————
+If at any point you wish to exit the program prematurely, please enter 'quit'.
+''')
+
+#**************************************************************************
+#***********                       Module 2                       *********
+#***************       Data Retrieval of User Preferences   ***************
+#**************************************************************************
+
+#Investment Approach
+print(
+    
+    '''This software offers a number of approaches for portfolio management. Which of the following do you prefer:
+
+        Integrative: Enter equities you already own to recieve feedback on balancing your portfolio among these stocks.
+
+        Speculative: Enter stocks you are interested in to recieve Buy, Sell, Hold recommendations.
+
+        Holistic: Enter stocks within your current portfolio. After doing so, you enter stocks to recieve their impact on your portfolio.
+''')
+
+ifIntegrative = ['integrative', 'int', 'i']
+ifSpeculative = ['speculative', 'spec', 's']
+ifHolistic = ['holistic', 'hol', 'h']
+
+while True:
+
+    invApproach = input("Please enter 'Integrative', 'Speculative' or 'Holistic': ")
+    invApproach = invApproach.lower()
+
+    if invApproach in ifIntegrative:
+        print("\nYou have selected the integrative approach.")
+        break
+
+    if invApproach in ifSpeculative:
+        print("\nYou have selected the speculative approach.")
+        break
+
+    if invApproach in ifHolistic:
+        print("\nYou have selected the holistic approach.")
+        break
+
+    print("ERROR: Invalid entry. Try again!")
+
+# Investor Risk Tolerance
+print('''
+
+                                                    INVESTMENT STRATEGY
 
 
-#**************************************************************************
-#***************                  BLOCK 2                       ***********
-#**************************************************************************
-#**************************************************************************
+        In order for us to determine an investment strategy, we must first know the investor's risk tolerance.
+
+                Aggressive: Maximizing returns by taking a high degree of risk. This strategy will focus on capital appreciation
+                            by recommending the purchase of what are commonly know as "high-growth" stocks and the liquidation of stocks
+                            with low growth opportunity.
+
+
+                Moderate: This strategy attempts to find a balance between aggressive and conservative strategies by suggesting
+                            allocation toward so-called "value" stocks. These stocks have moderate growth potential and
+                            are typically undervalued by the market. Returns on this strategy are fairly volatile in the short-term
+                            but are favorable in the long-term
+
+                
+            Conservative: Maximizing the safety of the principal investment by accepting little-to-zero risk. This strategy will
+                            suggest allocation to "sturdy" stocks - i.e. companies with a history of stable cash flows. Returns are
+                            considerably lower under this strategy.
+
+        ''')
+
+
 
 #
 # read the stock data, portfolio_stocks.csv, into Python and store it in a variable "stocks"
@@ -156,15 +254,6 @@ print("\n---------------------------------------------------------")
 #***************                 BLOCK 4                       ************
 #**************************************************************************
 #**************************************************************************
-
-#
-# define a function that returns the negative Sharpe ratio if you pass the portfolio weights to the function
-#
-def negative_sharpe(weights):
-    weights = np.array(weights)
-    pret = np.dot(weights, mu)
-    pvol = np.sqrt(np.dot(weights, np.dot(VarCov, weights.T)))
-    return -(pret-rf)/pvol
 
 #
 # initial guess for the portfolio weights. Typically we start with equal weights as an initial guess

@@ -35,6 +35,8 @@ pd.options.display.max_rows = 10
 # 
 import yfinance as yf
 
+import csv
+
 
 #**************************************************************************
 #***********    Custom Functions (Modular Program Approach)    ************
@@ -62,7 +64,7 @@ def negative_sharpe(weights):
     pvol = np.sqrt(np.dot(weights, np.dot(VarCov, weights.T)))
     return -(pret-rf)/pvol
 
-def from_CSV(path):
+def from_CSV(filePath):
     '''
         Purpose: Reads a CSV from a user local drive at a path they have specified.
 
@@ -75,9 +77,9 @@ def from_CSV(path):
     #
     # read the stock data, portfolio_stocks.csv, into Python and store it in a variable "stocks"
     #
-    stocks = pd.read_csv(path)
+    stocks = pd.read_csv(filePath)
 
-    # creating dictionary with which to store raw company data
+# creating dictionary with which to store raw company data
     symbols = {}
     index = 0
     for company in stocks["Ticker"]:
@@ -89,7 +91,7 @@ def from_CSV(path):
 
     return tickers
 
-def stock_entry():
+def stock_upload():
     ''' 
         Purpose: Extracts user ticker information either manually or via CSV upload/
 
@@ -97,10 +99,97 @@ def stock_entry():
 
         Returns: A list variable containing series of stock tickers.
     '''
+    while True:
+        uploadForm = input("\nWould you like to provide your current portfolio manually or upload a CSV? Please enter 'manual' or 'upload': ")
+        print('\n')
+        uploadForm = uploadForm.lower()
+
+        if uploadForm == 'quit':
+            print("Exiting program now. Please come back soon! Goodbye...\n")
+            quit()
+        
+        elif uploadForm == 'manual' or uploadForm == 'upload':
+            break
+
+        else:
+             print("ERROR: Invalid entry. Try again!\n")
 
 
+    if uploadForm == 'upload':
+        print(
+            '''
+            Note: In order for the CSV to be processed correctly, stocks must be indicated 
+                  by their symbol under the header 'Ticker' in the file.
+            ''')
 
+        filePath = input("Please specify the file path: ")
+        premature_quit(filePath)
+        tickers = from_CSV(filePath)
 
+    if uploadForm == 'manual':
+        tickers = stock_entry()
+
+    return tickers
+    
+def premature_quit(str):
+    if str == 'QUIT' or str == 'quit':
+        print("Exiting program now. Please come back soon! Goodbye...\n")
+        quit()
+
+def stock_entry():
+        '''
+            Purpose: Provides a framework for the manual entry of stock symbols.
+
+            Params: None
+
+            Returns: A list variable containing series of stock tickers.
+
+        '''
+        tickers = []
+        while True:
+            symbol = input("Please enter stock symbol and enter 'done' when finished: ")
+            symbol = symbol.upper()
+
+            premature_quit(symbol)
+
+            if (len(symbol) > 5 or  (symbol.isalpha() == False  and "." not in symbol)): # Stock symbols can contain periods!
+                    print("ERROR: Expecting a properly-formed stock symbol like, for example, 'AAPL'.\n")
+            
+            else:
+                if (symbol == "DONE"):
+                    if not tickers:
+                        emptyListCheck = input("No valid data has been entered. Are you sure? Please enter 'yes' or 'no': ")
+                        emptyListCheck = emptyListCheck.upper()
+
+                        while (emptyListCheck != "YES" and emptyListCheck != "NO"):
+                            print("\nINVALID  ENTRY! Please try again!")
+                            emptyListCheck = input("No valid data has been entered. Are you sure? Please enter 'yes' or 'no': ")
+                            emptyListCheck = emptyListCheck.upper()
+
+                        if (emptyListCheck == 'YES'):
+                            premature_quit('quit')
+
+                    elif (len(tickers) > 0 ):
+                        break
+
+                elif (symbol in tickers):
+                    print("\nYou have already entered this symbol!")
+
+                    multipleEntries = input("\nWould you like to enter another stock? Enter 'yes' or 'no': ")
+                    multipleEntries = multipleEntries.upper()
+
+                    while (multipleEntries != "YES" and multipleEntries != "NO"):
+                        print("\nINVALID  ENTRY! Please try again!")
+                        multipleEntries = input("Would you like to enter another stock? Enter 'yes' or 'no': ")
+                        multipleEntries = multipleEntries.upper()
+
+                    if (multipleEntries == "NO"):
+                        break
+                    
+                else:
+                    tickers.append(symbol)   
+            
+        return tickers
 
 #**************************************************************************
 #***************                  Module 1                      ***********
@@ -111,13 +200,13 @@ def stock_entry():
 print("\n\nWelcome to Planalytics LLC. Securities Manangement Software!")
 print(
 '''
-The following program will recieve an entry of one or more stock tickers
-(ex, IBM, AAPL, MSFT) and produce a Buy, Sell, or Hold recommendation for each.
+The following program will recieve stock data via CSV upload or manual
+entry (ex. IBM, AAPL, MSFT) and produce various portfoio analysis on that data.
 
 The historical data (from the previous 100 days) will be written to a .csv file
 corresponding to each stock entered.
 
-Please be sure to enter an accurate symbol to avoid receiving an error message.
+Please be sure to provide accurate stock symbols to avoid receiving an error messages.
 
 -——————————————————————————————————————————————————————————————————————————————
 If at any point you wish to exit the program prematurely, please enter 'quit'.
@@ -149,6 +238,8 @@ while True:
 
     invApproach = input("Please enter 'Integrative', 'Speculative' or 'Holistic': ")
     invApproach = invApproach.lower()
+
+    premature_quit(invApproach)
 
     if invApproach in ifHolistic:
         invApproach = 'Holistic'
@@ -196,16 +287,14 @@ print(f'''
 
 ifAggressive = ['aggressive', 'a']
 ifModerate = ['moderate', 'm']
-ifConservative = ['conservatice', 'c']
+ifConservative = ['conservative', 'c']
 status = False
 
 while True:
     risk_tolerance = input("Please select an investment strategy. Enter 'Aggressive', 'Moderate, or 'Conservative': ")
     risk_tolerance = risk_tolerance.lower()
 
-    if (risk_tolerance == 'quit'):
-        print("Exiting program now. Please come back soon! Goodbye...\n")
-        quit()
+    premature_quit(risk_tolerance)
 
     if risk_tolerance in ifAggressive:
         risk_tolerance = 'Aggressive'
@@ -220,7 +309,7 @@ while True:
         status = True
 
     if status == True:
-        confirmation = f"\nYou have selected the {risk_tolerance} approach."
+        confirmation = f"\nYou have selected a {risk_tolerance} investment strategy."
         print(confirmation)
         break
 
@@ -231,9 +320,7 @@ while True:
 #***************     Data Retrieval of User's Stock Selection   ***********
 #**************************************************************************
 
-
-
-
+tickers = stock_upload()
 
 #
 # yf.download function retrieves daily prices for a list of securities in a batch and convert that to a Dataframe
@@ -249,6 +336,19 @@ price_data.sort_index()
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+numOfAssets = len(tickers)
 
 
 

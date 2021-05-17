@@ -457,6 +457,7 @@ if invApproach == 'integrative':
     VarCov = rets.cov() * timing
     rf = fetch_RiskFreeRate()
 
+
     #if portfolioSelection == '1':
 
 
@@ -466,7 +467,7 @@ if invApproach == 'integrative':
     if portfolioSelection == '3':
         
 
-        numOfAssets = len(price_data)
+        numOfAssets = len(rets.keys())
 
         #
         # initial guess for the portfolio weights. Typically we start with equal weights as an initial guess
@@ -536,7 +537,7 @@ if invApproach == 'speculative':
 
        elif (risk_tolerance == 'moderate'):
 
-           if (mu[stock].mean() >= 0.6):
+           if (mu[stock].mean() >= 0.06):
                rec = "BUY"
                reason = ''' The stock is currently generating greater than 6% annual 
                         return offering relatively strong growth value to an 
@@ -581,12 +582,88 @@ if invApproach == 'speculative':
        print(f"RECOMMENDATION REASON: {reason}")
        print("-----------------------------------------------------------------------------------")        
 
+
 if invApproach == 'holistic':
 
+    print("Please provide the stocks currently contained within your portfolio.")
     tickers = stock_upload()
     price_data = stock_data_retrieval(tickers)
+    rets = fetch_returns(price_data)
+    mu = rets.mean() * 252
+    VarCov = rets.cov() * 252
+    rf = fetch_RiskFreeRate()
+ 
+    #assuming portfolio is well-diversified
+    numOfAssets = len(rets.keys())
+
+    #
+    # initial guess for the portfolio weights. Typically we start with equal weights as an initial guess
+    #
+    initial_guess = [1/numOfAssets for x in range(numOfAssets)]
+
+    #
+    # portfolio constraint: summation of weights should be 1
+    #
+    cons = ({'type': 'eq', 'fun': lambda weights: np.sum(weights) - 1})
+
+    #
+    # impose additional constraint: does not allow short sale, i.e. all the individual weights between 0 and 1
+    #
+    bnds = tuple((0,1) for x in range(numOfAssets))
+
+    #
+    # now we are ready to use the minimization function
+    # if you are leaving the arguments to "none", then you don't need to include them
+    #
+    opt_mve = sco.minimize(negative_sharpe, initial_guess, bounds=bnds, constraints=cons)
+
+    #
+    # to extract the optimal portfolio weights, call it through 'x'
+    #
+    mve_weights = opt_mve['x']
+
+    sharpeRatio = -negative_sharpe(mve_weights)
+    sharpeRatio = round(sharpeRatio, 2)
+    print(sharpeRatio)
+
+    print("\nNow provide a stock(s) you'd like to consider purchasing.")
+    newStock = stock_entry()
+    new_price_data = stock_data_retrieval(newStock)
+    new_rets = fetch_returns(new_price_data)
+    new_mu = new_rets.mean() * 252
+
+    if len(newStock) == 1:
+        new_VarCov = np.var(new_rets) * 252
+    else:
+        new_VarCov = new_rets.cov() * 252
+
+    new_numOfAssets = len(newStock)
+    new_weights = [1/new_numOfAssets for x in range(new_numOfAssets)]
+    new_weights = np.array(new_weights)
+    new_pret = np.dot(new_weights, new_mu)
+    new_pvol = np.sqrt(np.dot(new_weights, np.dot(new_VarCov, new_weights.T)))
+    newSharpe = (new_pret-rf)/new_pvol
+    newSharpe = float(newSharpe)
+    newSharpe = round(newSharpe, 2)
+    print(newSharpe)
+
+rets = rets.mean(axis=1)
+
+rets.drop(rets.tail(1).index,inplace=True)
+rets.drop(rets.head(1).index,inplace=True)
+new_rets.drop(new_rets.head(1).index,inplace=True)
 
 
+corrcoef = np.corrcoef(new_rets, rets)
+corr = corrcoef.sum(axis=0)
+corr = list(corr)
+correlation = corr[0]-1
+
+if (newSharpe >= (sharpeRatio * correlation) ):
+    print("\This stock improves the risk-return profile of your portfolio. You should include it within your portfolio.\n")
+
+else:
+    print("\nThis stock DOES NOT improve the risk-return profile of your portfolio. You should NOT include it within your portfolio.\n")
 
 #**************************************************************************
 #***************                 BLOCK 4                       ************

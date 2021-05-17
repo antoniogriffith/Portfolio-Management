@@ -300,8 +300,8 @@ print(
 The following program will recieve stock data via CSV upload or manual
 entry (ex. IBM, AAPL, MSFT) and produce various portfoio analysis on that data.
 
-The historical data (from the previous 100 days) will be written to a .csv file
-corresponding to each stock entered.
+The historical data (from the previous three years) will be used to conduct techincal
+analysis on each stock entered, as well as on entire portfolios.
 
 Please be sure to provide accurate stock symbols to avoid receiving an error messages.
 
@@ -497,8 +497,23 @@ if invApproach == 'integrative':
 
         sharpeRatio = -negative_sharpe(mve_weights)
         sharpeRatio = round(sharpeRatio, 2)
+        
+        print("---------------------------------------------------------\n")
+        
+        print("OPTIMAL PORTFOLIO CONSTRUCTION:\n")
 
-
+        index = 0
+        stockWeights = {}
+        for stock in tickers:
+            stockWeights[tickers[index]] = to_Percentage(mve_weights[index])
+            index += 1
+        
+        for item in stockWeights:
+            stockWeights[item] = float(stockWeights[item].replace('%', ""))
+            if stockWeights[item] > 0:
+                print(item.rjust(8), "  ", str(stockWeights[item]) + "%")
+        
+        print("\n---------------------------------------------------------")
 
 
 if invApproach == 'speculative':
@@ -624,7 +639,6 @@ if invApproach == 'holistic':
 
     sharpeRatio = -negative_sharpe(mve_weights)
     sharpeRatio = round(sharpeRatio, 2)
-    print(sharpeRatio)
 
     print("\nNow provide a stock(s) you'd like to consider purchasing.")
     newStock = stock_entry()
@@ -645,25 +659,29 @@ if invApproach == 'holistic':
     newSharpe = (new_pret-rf)/new_pvol
     newSharpe = float(newSharpe)
     newSharpe = round(newSharpe, 2)
-    print(newSharpe)
 
-rets = rets.mean(axis=1)
+    rets = rets.mean(axis=1)
 
-rets.drop(rets.tail(1).index,inplace=True)
-rets.drop(rets.head(1).index,inplace=True)
-new_rets.drop(new_rets.head(1).index,inplace=True)
+    rets.drop(rets.tail(1).index,inplace=True)
+    rets.drop(rets.head(1).index,inplace=True)
+    new_rets.drop(new_rets.head(1).index,inplace=True)
 
 
-corrcoef = np.corrcoef(new_rets, rets)
-corr = corrcoef.sum(axis=0)
-corr = list(corr)
-correlation = corr[0]-1
+    corrcoef = np.corrcoef(new_rets, rets)
+    corr = corrcoef.sum(axis=0)
+    corr = list(corr)
+    correlation = corr[0]-1
 
-if (newSharpe >= (sharpeRatio * correlation) ):
-    print("\This stock improves the risk-return profile of your portfolio. You should include it within your portfolio.\n")
+    print("---------------------------------------------------------\n")
+    print("\nRESULT:")
 
-else:
-    print("\nThis stock DOES NOT improve the risk-return profile of your portfolio. You should NOT include it within your portfolio.\n")
+    if (newSharpe >= (sharpeRatio * correlation) ):
+        print("\This stock improves the risk-return profile of your portfolio. You should include it within your portfolio.\n")
+
+    else:
+        print("\nThis stock DOES NOT improve the risk-return profile of your portfolio. You should NOT include it within your portfolio.\n")
+
+    print("---------------------------------------------------------\n")
 
 #**************************************************************************
 #***************                 BLOCK 4                       ************

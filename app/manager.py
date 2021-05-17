@@ -307,7 +307,7 @@ Please be sure to provide accurate stock symbols to avoid receiving an error mes
 
 -——————————————————————————————————————————————————————————————————————————————
 If at any point you wish to exit the program prematurely, please enter 'quit'.
-''')
+\n''')
 
 #**************************************************************************
 #***********                       Module 2                       *********

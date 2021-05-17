@@ -101,6 +101,7 @@ def stock_upload():
     '''
     while True:
         uploadForm = input("\nWould you like to provide your current portfolio manually or upload a CSV? Please enter 'manual' or 'upload': ")
+        print('\n')
         uploadForm = uploadForm.lower()
 
         if uploadForm == 'quit':
@@ -122,12 +123,18 @@ def stock_upload():
             ''')
 
         filePath = input("Please specify the file path: ")
+        premature_quit(filePath)
         tickers = from_CSV(filePath)
 
     if uploadForm == 'manual':
         tickers = stock_entry()
 
     return tickers
+    
+def premature_quit(str):
+    if str == 'QUIT' or str == 'quit':
+        print("Exiting program now. Please come back soon! Goodbye...\n")
+        quit()
 
 def stock_entry():
         '''
@@ -140,58 +147,47 @@ def stock_entry():
         '''
         tickers = []
         while True:
-            symbol = input("\nPlease enter stock symbol or enter 'quit' to exit: ")
+            symbol = input("Please enter stock symbol and enter 'done' when finished: ")
             symbol = symbol.upper()
 
-            if(symbol == 'QUIT'):
-                print("Exiting program now. Please come back soon! Goodbye...\n")
-                quit()
+            premature_quit(symbol)
 
-            elif (symbol in tickers):
-                print("\nYou have already entered this symbol!")
-
-                multipleEntries = input("\nWould you like to enter another stock? Enter 'yes' or 'no': ")
-                multipleEntries = multipleEntries.upper()
-
-                while (multipleEntries != "YES" and multipleEntries != "NO"):
-                    print("\nINVALID  ENTRY! Please try again!")
-                    multipleEntries = input("Would you like to enter another stock? Enter 'yes' or 'no': ")
-                    multipleEntries = multipleEntries.upper()
-
-                if (multipleEntries == "NO"):
-                    break
-        
+            if (len(symbol) > 5 or  (symbol.isalpha() == False  and "." not in symbol)): # Stock symbols can contain periods!
+                    print("ERROR: Expecting a properly-formed stock symbol like, for example, 'AAPL'.\n")
+            
             else:
-                if (len(symbol) > 5 or  (symbol.isalpha() == False  and "." not in symbol)): # Stock symbols can contain periods!
-                    print("Oh, expecting a properly-formed stock symbol like 'MSFT'.\n")
-                else:
-                    tickers.append(symbol)
-
-
-            multipleEntries = input("\nWould you like to enter another stock? Enter 'yes' or 'no': ")
-            multipleEntries = multipleEntries.upper()
-
-            while (multipleEntries != "YES" and multipleEntries != "NO"):
-                print("\nINVALID  ENTRY! Please try again!")
-                multipleEntries = input("Would you like to enter another stock? Enter 'yes' or 'no': ")
-                multipleEntries = multipleEntries.upper()
-
-            if (multipleEntries == "NO"):
-                if not tickers:
-                    emptyListCheck = input("No valid data has been entered. Are you sure? Please enter 'yes' or 'no': ")
-                    emptyListCheck = emptyListCheck.upper()
-
-                    while (emptyListCheck != "YES" and emptyListCheck != "NO"):
-                        print("\nINVALID  ENTRY! Please try again!")
+                if (symbol == "DONE"):
+                    if not tickers:
                         emptyListCheck = input("No valid data has been entered. Are you sure? Please enter 'yes' or 'no': ")
                         emptyListCheck = emptyListCheck.upper()
 
-                    if (emptyListCheck == 'YES'):
-                        print("Exiting program now. Please come back soon! Goodbye...\n")
-                        quit()
+                        while (emptyListCheck != "YES" and emptyListCheck != "NO"):
+                            print("\nINVALID  ENTRY! Please try again!")
+                            emptyListCheck = input("No valid data has been entered. Are you sure? Please enter 'yes' or 'no': ")
+                            emptyListCheck = emptyListCheck.upper()
 
-                elif (len(tickers) > 0 ):
-                    break   
+                        if (emptyListCheck == 'YES'):
+                            premature_quit('quit')
+
+                    elif (len(tickers) > 0 ):
+                        break
+
+                elif (symbol in tickers):
+                    print("\nYou have already entered this symbol!")
+
+                    multipleEntries = input("\nWould you like to enter another stock? Enter 'yes' or 'no': ")
+                    multipleEntries = multipleEntries.upper()
+
+                    while (multipleEntries != "YES" and multipleEntries != "NO"):
+                        print("\nINVALID  ENTRY! Please try again!")
+                        multipleEntries = input("Would you like to enter another stock? Enter 'yes' or 'no': ")
+                        multipleEntries = multipleEntries.upper()
+
+                    if (multipleEntries == "NO"):
+                        break
+                    
+                else:
+                    tickers.append(symbol)   
             
         return tickers
 
@@ -204,13 +200,13 @@ def stock_entry():
 print("\n\nWelcome to Planalytics LLC. Securities Manangement Software!")
 print(
 '''
-The following program will recieve an entry of one or more stock tickers
-(ex, IBM, AAPL, MSFT) and produce a Buy, Sell, or Hold recommendation for each.
+The following program will recieve stock data via CSV upload or manual
+entry (ex. IBM, AAPL, MSFT) and produce various portfoio analysis on that data.
 
 The historical data (from the previous 100 days) will be written to a .csv file
 corresponding to each stock entered.
 
-Please be sure to enter an accurate symbol to avoid receiving an error message.
+Please be sure to provide accurate stock symbols to avoid receiving an error messages.
 
 -——————————————————————————————————————————————————————————————————————————————
 If at any point you wish to exit the program prematurely, please enter 'quit'.
@@ -243,9 +239,7 @@ while True:
     invApproach = input("Please enter 'Integrative', 'Speculative' or 'Holistic': ")
     invApproach = invApproach.lower()
 
-    if (invApproach == 'quit'):
-        print("Exiting program now. Please come back soon! Goodbye...\n")
-        quit()
+    premature_quit(invApproach)
 
     if invApproach in ifHolistic:
         invApproach = 'Holistic'
@@ -300,9 +294,7 @@ while True:
     risk_tolerance = input("Please select an investment strategy. Enter 'Aggressive', 'Moderate, or 'Conservative': ")
     risk_tolerance = risk_tolerance.lower()
 
-    if (risk_tolerance == 'quit'):
-        print("Exiting program now. Please come back soon! Goodbye...\n")
-        quit()
+    premature_quit(risk_tolerance)
 
     if risk_tolerance in ifAggressive:
         risk_tolerance = 'Aggressive'
@@ -317,7 +309,7 @@ while True:
         status = True
 
     if status == True:
-        confirmation = f"\nYou have selected the {risk_tolerance} approach."
+        confirmation = f"\nYou have selected a {risk_tolerance} investment strategy."
         print(confirmation)
         break
 
@@ -341,6 +333,19 @@ price_data = raw['Adj Close']
 
 # sort price_data by date in case the price_data was not sorted properly by date
 price_data.sort_index()
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 numOfAssets = len(tickers)

@@ -1,6 +1,6 @@
 # import some code we want to test
 
-from app.manager import to_Percentage, from_CSV
+from app.manager import to_Percentage, from_CSV, stock_entry
 
 def test_to_Percentage():
     assert to_Percentage(0.24678) == "24.68%"

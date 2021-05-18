@@ -135,6 +135,11 @@ def stock_upload():
     return tickers
     
 def premature_quit(str):
+    '''
+        Purpose: Allows for the user to exit the program by entering 'quit' when prompted for input.
+
+        Params: A string containing user input.
+    '''
     if str == 'QUIT' or str == 'quit':
         print("Exiting program now. Please come back soon! Goodbye...\n")
         quit()
@@ -210,8 +215,6 @@ def stock_data_retrieval(list):
         Parameters: A list containing stock symbols of companies.
 
         Returns: A pandas dataframe of historical adjusted close prices for the specified companies.
-
-
     '''
 
     #

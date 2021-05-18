@@ -65,6 +65,16 @@ def negative_sharpe(weights):
     pvol = np.sqrt(np.dot(weights, np.dot(VarCov, weights.T)))
     return -(pret-rf)/pvol
 
+def minimum_risk(weights):
+    '''
+        Purpose: To construct a portfolio which minimizes the risk of a portfolio.
+
+        Params: A numpy array containing portfolio 'weights'.
+    '''
+    weights = np.array(weights)
+    pvol = np.sqrt(np.dot(weights, np.dot(VarCov, weights.T)))
+    return pvol
+
 def from_CSV(filePath):
     '''
         Purpose: Reads a CSV from a user local drive at a path they have specified.
@@ -128,7 +138,7 @@ def stock_upload():
         tickers = from_CSV(filePath)
 
     if uploadForm == 'manual':
-        tickers = stock_entry()
+        tickers = stock_entry(comparison=False)
 
     return tickers
     
@@ -137,7 +147,7 @@ def premature_quit(str):
         print("Exiting program now. Please come back soon! Goodbye...\n")
         quit()
 
-def stock_entry():
+def stock_entry(comparison):
         '''
             Purpose: Provides a framework for the manual entry of stock symbols.
 
@@ -148,8 +158,14 @@ def stock_entry():
         '''
         tickers = []
         while True:
-            symbol = input("Please enter stock symbol and enter 'done' when finished: ")
-            symbol = symbol.upper()
+
+            if comparison == True:
+                symbol = input("Please enter a stock symbol to evaluate: ")
+                symbol = symbol.upper()
+
+            else:
+                symbol = input("Please enter stock symbol and enter 'done' when finished: ")
+                symbol = symbol.upper()
 
             premature_quit(symbol)
 
@@ -188,7 +204,10 @@ def stock_entry():
                         break
 
                 else:
-                    tickers.append(symbol)   
+                    tickers.append(symbol)
+
+                if comparison == True:
+                    break   
             
         return tickers
 
@@ -370,13 +389,13 @@ print(f'''
                             with low growth opportunity.
 
 
-                Moderate: This strategy attempts to find a balance between aggressive and conservative strategies by suggesting
+                Moderate:   This strategy attempts to find a balance between aggressive and conservative strategies by suggesting
                             allocation toward so-called "value" stocks. These stocks have moderate growth potential and
                             are typically undervalued by the market. Returns on this strategy are fairly volatile in the short-term
                             but are favorable in the long-term
 
                 
-            Conservative: Maximizing the safety of the principal investment by accepting little-to-zero risk. This strategy will
+            Conservative:   Maximizing the safety of the principal investment by accepting little-to-zero risk. This strategy will
                             suggest allocation to "sturdy" stocks - i.e. companies with a history of stable cash flows. Returns are
                             considerably lower under this strategy.
 
@@ -426,24 +445,24 @@ while True:
 
 if invApproach == 'integrative':
 
+    comparison = False
+
     print( 
         '''
             Which of the following portfolios do you wish to construct:
 
               1.  Minimum Risk: Your portfolio will be rebalanced based upon the risk tolerance you've indicated.
 
-              2.  Maximum Return: You may wish you achieve the greatest possible return.
-
-              3.  Maximizing Risk-Return Profile: This portfolio will provide the greatest level of return per-unit of risk.
+              2.  Maximizing Risk-Return Profile: This portfolio will provide the greatest level of return per-unit of risk.
         '''
     )
 
     while True:
-        portfolioSelection = input("Select one of the above portfolio constructions. Enter '1', '2', or '3': ")
+        portfolioSelection = input("Select one of the above portfolio constructions. Enter '1', or '2': ")
 
         premature_quit(portfolioSelection)
 
-        if portfolioSelection != '1' and portfolioSelection != '2' and portfolioSelection != '3':
+        if portfolioSelection != '1' and portfolioSelection != '2':
             print("\nINVALID  ENTRY! Please try again!")
         else:
             break
@@ -457,14 +476,58 @@ if invApproach == 'integrative':
     VarCov = rets.cov() * timing
     rf = fetch_RiskFreeRate()
 
+    if portfolioSelection == '1':
 
-    #if portfolioSelection == '1':
+        numOfAssets = len(rets.keys())
+
+        #
+        # initial guess for the portfolio weights. Typically we start with equal weights as an initial guess
+        #
+        initial_guess = [1/numOfAssets for x in range(numOfAssets)]
+
+        #
+        # portfolio constraint: summation of weights should be 1
+        #
+        cons = ({'type': 'eq', 'fun': lambda weights: np.sum(weights) - 1})
+
+        #
+        # impose additional constraint: does not allow short sale, i.e. all the individual weights between 0 and 1
+        #
+        bnds = tuple((0,1) for x in range(numOfAssets))
+
+        #
+        # now we are ready to use the minimization function
+        # if you are leaving the arguments to "none", then you don't need to include them
+        #
+        opt_mve = sco.minimize(minimum_risk, initial_guess, bounds=bnds, constraints=cons)
+
+        #
+        # to extract the optimal portfolio weights, call it through 'x'
+        #
+        mve_weights = opt_mve['x']
+
+        sharpeRatio = -negative_sharpe(mve_weights)
+        sharpeRatio = round(sharpeRatio, 2)
+        
+        print("---------------------------------------------------------\n")
+        
+        print("OPTIMAL PORTFOLIO CONSTRUCTION FOR MINIMUM RISK:\n")
+
+        index = 0
+        stockWeights = {}
+        for stock in tickers:
+            stockWeights[tickers[index]] = to_Percentage(mve_weights[index])
+            index += 1
+        
+        for item in stockWeights:
+            stockWeights[item] = float(stockWeights[item].replace('%', ""))
+            if stockWeights[item] > 0:
+                print(item.rjust(8), "  ", str(stockWeights[item]) + "%")
+        
+        print("\n---------------------------------------------------------\n")
 
 
-    #if portfolioSelection == '2':
-
-
-    if portfolioSelection == '3':
+    if portfolioSelection == '2':
         
 
         numOfAssets = len(rets.keys())
@@ -500,7 +563,7 @@ if invApproach == 'integrative':
         
         print("---------------------------------------------------------\n")
         
-        print("OPTIMAL PORTFOLIO CONSTRUCTION:\n")
+        print("OPTIMAL PORTFOLIO CONSTRUCTION FOR MAXIMUM RISK-RETURN:\n")
 
         index = 0
         stockWeights = {}
@@ -513,11 +576,12 @@ if invApproach == 'integrative':
             if stockWeights[item] > 0:
                 print(item.rjust(8), "  ", str(stockWeights[item]) + "%")
         
-        print("\n---------------------------------------------------------")
+        print("\n---------------------------------------------------------\n")
 
 
 if invApproach == 'speculative':
 
+    comparison = False
     tickers = stock_upload()
     price_data = stock_data_retrieval(tickers)
     rets = fetch_returns(price_data)
@@ -612,36 +676,17 @@ if invApproach == 'holistic':
     numOfAssets = len(rets.keys())
 
     #
-    # initial guess for the portfolio weights. Typically we start with equal weights as an initial guess
+    # assuming equal weighted portfolio to reduce complexity
     #
-    initial_guess = [1/numOfAssets for x in range(numOfAssets)]
+    weights = [1/numOfAssets for x in range(numOfAssets)]
 
-    #
-    # portfolio constraint: summation of weights should be 1
-    #
-    cons = ({'type': 'eq', 'fun': lambda weights: np.sum(weights) - 1})
-
-    #
-    # impose additional constraint: does not allow short sale, i.e. all the individual weights between 0 and 1
-    #
-    bnds = tuple((0,1) for x in range(numOfAssets))
-
-    #
-    # now we are ready to use the minimization function
-    # if you are leaving the arguments to "none", then you don't need to include them
-    #
-    opt_mve = sco.minimize(negative_sharpe, initial_guess, bounds=bnds, constraints=cons)
-
-    #
-    # to extract the optimal portfolio weights, call it through 'x'
-    #
-    mve_weights = opt_mve['x']
-
-    sharpeRatio = -negative_sharpe(mve_weights)
+    sharpeRatio = -negative_sharpe(weights)
     sharpeRatio = round(sharpeRatio, 2)
+    print(sharpeRatio)
 
-    print("\nNow provide a stock(s) you'd like to consider purchasing.")
-    newStock = stock_entry()
+    print("\nNow provide a stock you'd like to consider purchasing.")
+    comparison = True
+    newStock = stock_entry(comparison)
     new_price_data = stock_data_retrieval(newStock)
     new_rets = fetch_returns(new_price_data)
     new_mu = new_rets.mean() * 252
@@ -659,10 +704,14 @@ if invApproach == 'holistic':
     newSharpe = (new_pret-rf)/new_pvol
     newSharpe = float(newSharpe)
     newSharpe = round(newSharpe, 2)
+    print(newSharpe)
 
     rets = rets.mean(axis=1)
 
-    rets.drop(rets.tail(1).index,inplace=True)
+    while len(rets) > len(new_rets):
+        rets.drop(rets.tail(1).index,inplace=True)
+    
+    
     rets.drop(rets.head(1).index,inplace=True)
     new_rets.drop(new_rets.head(1).index,inplace=True)
 
@@ -676,10 +725,18 @@ if invApproach == 'holistic':
     print("\nRESULT:")
 
     if (newSharpe >= (sharpeRatio * correlation) ):
-        print("\This stock improves the risk-return profile of your portfolio. You should include it within your portfolio.\n")
+        print('''
+This stock improves the risk-return profile of your portfolio. 
+You should include it within your portfolio.
+        
+        ''')
+
 
     else:
-        print("\nThis stock DOES NOT improve the risk-return profile of your portfolio. You should NOT include it within your portfolio.\n")
+        print('''
+This stock DOES NOT improve the risk-return profile of your portfolio. 
+You should NOT include it within your portfolio.
+        ''')
 
     print("---------------------------------------------------------\n")
 

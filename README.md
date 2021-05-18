@@ -119,24 +119,27 @@ pip install -r requirements.txt
 
 ```
 python -m app.manager
+
 ```
 
-## Step 2: User input will be asked to enter specific preference, including investment strategy and risk tolerance.
+## Step 2: User input will be asked to enter specific preference,including investment strategy and risk tolerance.
 
-## Step 3: User selects a specific technical analysis to be produce: integrative, speculative, holistic.
+## Step 3: User selects a specific technical analysis to be produced: integrative, speculative, holistic.
 
-# Integrative: Enter equities you already own to recieve feedback on balancing your portfolio among these stocks.
+```
+Integrative: Enter equities you already own to recieve feedback on balancing your portfolio among these stocks.
 
-# Speculative: Enter stocks you are interested in to recieve Buy, Sell, Hold recommendations.
+Speculative: Enter stocks you are interested in to recieve Buy, Sell, Hold recommendations.
 
-# Holistic: Enter stocks within your current portfolio. After doing so, you may enter new stocks to recieve their impact on your portfolio.
+Holistic: Enter stocks within your current portfolio. After doing so, you may enter new stocks to recieve their impact on your portfolio.
 
-# These instrutions can also be found within the program.
+'''
+### These instrutions can also be found within the program.
 
 
 ## Step 4: User is able to provide as many stocks as required either via manual entry or CSV upload.
 
-# If CSV upload, the file should follow the following format:
+### If CSV upload, the file should follow the following format:
 ```
 id,Company Name,Ticker,Sector
 1,"Apple, Inc.",AAPL,TECHNOLOGY
@@ -147,7 +150,6 @@ id,Company Name,Ticker,Sector
 ```
 
 ## Step 5: Program produces advise/recommendations specific to the user's preferences.
-
 
 
 ## Step 6: Program will then exit automatically.

@@ -314,17 +314,17 @@ if __name__ == "__main__":
     print("\n\nWelcome to Planalytics LLC. Securities Manangement Software!")
     print(
     '''
-    The following program will recieve stock data via CSV upload or manual
-    entry (ex. IBM, AAPL, MSFT) and produce various portfoio analysis on that data.
+The following program will recieve stock data via CSV upload or manual
+entry (ex. IBM, AAPL, MSFT) and produce various portfoio analysis on that data.
 
-    The historical data (from the previous three years) will be used to conduct techincal
-    analysis on each stock entered, as well as on entire portfolios.
+The historical data (from the previous three years) will be used to conduct techincal
+analysis on each stock entered, as well as on entire portfolios.
 
-    Please be sure to provide accurate stock symbols to avoid receiving an error messages.
+Please be sure to provide accurate stock symbols to avoid receiving an error messages.
 
-    -——————————————————————————————————————————————————————————————————————————————
-    If at any point you wish to exit the program prematurely, please enter 'quit'.
-    \n''')
+-——————————————————————————————————————————————————————————————————————————————
+If at any point you wish to exit the program prematurely, please enter 'quit'.
+\n''')
 
     #**************************************************************************
     #***********                       Module 2                       *********
@@ -334,7 +334,7 @@ if __name__ == "__main__":
     #Investment Approach
     print(
 
-        '''This software offers a number of approaches for portfolio management. Which of the following do you prefer:
+        ''' This software offers a number of approaches for portfolio management. Which of the following do you prefer:
 
             Integrative: Enter equities you already own to recieve feedback on balancing your portfolio among these stocks.
 

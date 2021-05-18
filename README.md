@@ -128,12 +128,12 @@ python -m app.manager
 ```sh
 Integrative: Enter equities you already own to recieve feedback on balancing your portfolio among these stocks.
 
-Speculative: Enter stocks you are interested in to recieve Buy, Sell, Hold recommendations.
+Speculative: Enter stocks you are may like to recieve Buy, Sell, Hold recommendations for.
 
 Holistic: Enter stocks within your current portfolio. After doing so, you may enter new stocks to recieve their impact on your portfolio.
 ```
 
-### These instrutions can also be found within the program.
+#### These instrutions can also be found within the program.
 
 
 ## Step 4: User is able to provide as many stocks as required either via manual entry or CSV upload.

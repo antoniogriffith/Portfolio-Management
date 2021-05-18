@@ -7,7 +7,6 @@ matplotlib
 scipy
 numpy
 yfinance
-csv
 
 #
 # DEVELOPMENT AND TEST

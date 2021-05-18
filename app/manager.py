@@ -591,65 +591,66 @@ If at any point you wish to exit the program prematurely, please enter 'quit'.
            
                if (mu[stock].mean() >= 0.08):
                    rec = "BUY"
-                   reason = '''     The stock is demonstrating upward momentum. 
-                            Asset offers a high-growth proposition.'''
+                   reason = '''     
+                     The stock is demonstrating upward momentum. 
+                     Asset offers a high-growth proposition.'''
 
                elif (mu[stock] <= 0.04):
                    rec = "SELL"
                    reason = '''     
-                            The stock is demonstrating low growth value, 
-                            currently generating less than 4% annual return 
-                            An aggressive strategy calls for the liquidation 
-                            of low-growth postions.'''
+                     The stock is demonstrating low growth value, 
+                     currently generating less than 4% annual return 
+                     An aggressive strategy calls for the liquidation 
+                     of low-growth postions.'''
                else:
                    rec = "HOLD"
                    reason = '''    
-                            The stock is generating resonable returns
-                            and should be held until its growth proposition 
-                            is more clear to the market.'''
+                     The stock is generating resonable returns
+                     and should be held until its growth proposition 
+                     is more clear to the market.'''
 
            elif (risk_tolerance == 'moderate'):
 
                if (mu[stock].mean() >= 0.06):
                    rec = "BUY"
                    reason = '''    
-                            The stock is currently generating greater than 6% annual 
-                            return offering relatively strong growth value to an 
-                            investor willing to incur moderate risk.'''
+                     The stock is currently generating greater than 6% annual 
+                     return offering relatively strong growth value to an 
+                     investor willing to incur moderate risk.'''
 
                elif (mu[stock] <= 0.03):
                    rec = "SELL"
                    reason = ''' 
-                            The stock is generating less than 3% annual return, 
-                            indicating that the market recognizes little growth value 
-                            in the stock moving forward.'''           
+                     The stock is generating less than 3% annual return, 
+                     indicating that the market recognizes little growth value 
+                     in the stock moving forward.'''           
                else:
                    rec = "HOLD"
                    reason ='''    
-                            The stock is generating resonable returns
-                            and should be held until its growth proposition 
-                            is more clear to the market.'''
+                     The stock is generating resonable returns
+                     and should be held until its growth proposition 
+                     is more clear to the market.'''
            else:
 
                if (mu[stock] >= 0.01):
                    rec = "BUY"
                    reason = '''   
-                            The stock is generating moderate returns. 
-                            A conservative strategy focuses on principal 
-                            protection rather than growth.'''
+                     The stock is generating moderate returns. 
+                     A conservative strategy focuses on principal 
+                     protection rather than growth.'''
 
                elif (mu[stock] <= -0.01):
                    rec = "SELL"
                    reason = '''   
-                            The stock is currently generating negative
-                            annual returns, indicating that principal is 
-                            at risk. Conservative investors should sell.'''
+                     The stock is currently generating negative
+                     annual returns, indicating that principal is 
+                     at risk. Conservative investors should sell.'''
                else:
                    rec = "HOLD"
                    reason = '''   
-                            The stock is demonstrating relative stability, 
-                            offering predictability and consistent 
-                            returns to conservative investors. '''
+                     The stock is demonstrating relative stability, 
+                     offering predictability and consistent 
+                     returns to conservative investors. '''
 
            print("\n-----------------------------------------------------------------------------------")
            print(f"SELECTED SYMBOL: {stock.upper()}")
@@ -719,7 +720,7 @@ If at any point you wish to exit the program prematurely, please enter 'quit'.
         corr = list(corr)
         correlation = corr[0]-1
 
-        print("---------------------------------------------------------\n")
+        print("-----------------------------------------------------------------------------------")
         print("\nRESULT:")
 
         if (newSharpe >= (sharpeRatio * correlation) ):
@@ -736,4 +737,4 @@ This stock DOES NOT improve the risk-return profile of your portfolio.
 You should NOT include it within your portfolio.
             ''')
 
-        print("---------------------------------------------------------\n")
+        print("-----------------------------------------------------------------------------------")

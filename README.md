@@ -143,7 +143,7 @@ Holistic: Enter stocks within your current portfolio. After doing so, you may en
 id,Company Name,Ticker,Sector
 1,"Apple, Inc.",AAPL,TECHNOLOGY
 2,"Facebook, Inc.",FB,TECHNOLOGY
-3,Microsoft Corp.,MSFT,TECHNOLOGY
+3,"Microsoft Corp.",MSFT,TECHNOLOGY
 4,"Netflix, Inc.",NFLX,TECHNOLOGY
 5,"Paypal, Inc.",PYPL,TECHNOLOGY
 ```

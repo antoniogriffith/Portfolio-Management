@@ -591,18 +591,20 @@ If at any point you wish to exit the program prematurely, please enter 'quit'.
            
                if (mu[stock].mean() >= 0.08):
                    rec = "BUY"
-                   reason = ''' The stock is demonstrating upward momentum. 
+                   reason = '''     The stock is demonstrating upward momentum. 
                             Asset offers a high-growth proposition.'''
 
                elif (mu[stock] <= 0.04):
                    rec = "SELL"
-                   reason = ''' The stock is demonstrating low growth value, 
+                   reason = '''     
+                            The stock is demonstrating low growth value, 
                             currently generating less than 4% annual return 
                             An aggressive strategy calls for the liquidation 
                             of low-growth postions.'''
                else:
                    rec = "HOLD"
-                   reason = ''' The stock is generating resonable returns
+                   reason = '''    
+                            The stock is generating resonable returns
                             and should be held until its growth proposition 
                             is more clear to the market.'''
 
@@ -610,36 +612,42 @@ If at any point you wish to exit the program prematurely, please enter 'quit'.
 
                if (mu[stock].mean() >= 0.06):
                    rec = "BUY"
-                   reason = ''' The stock is currently generating greater than 6% annual 
+                   reason = '''    
+                            The stock is currently generating greater than 6% annual 
                             return offering relatively strong growth value to an 
                             investor willing to incur moderate risk.'''
 
                elif (mu[stock] <= 0.03):
                    rec = "SELL"
-                   reason = ''' The stock is generating less than 3% annual return, 
+                   reason = ''' 
+                            The stock is generating less than 3% annual return, 
                             indicating that the market recognizes little growth value 
                             in the stock moving forward.'''           
                else:
                    rec = "HOLD"
-                   reason =''' The stock is generating resonable returns
+                   reason ='''    
+                            The stock is generating resonable returns
                             and should be held until its growth proposition 
                             is more clear to the market.'''
            else:
 
                if (mu[stock] >= 0.01):
                    rec = "BUY"
-                   reason = ''' The stock is generating moderate returns. 
+                   reason = '''   
+                            The stock is generating moderate returns. 
                             A conservative strategy focuses on principal 
                             protection rather than growth.'''
 
                elif (mu[stock] <= -0.01):
                    rec = "SELL"
-                   reason = ''' The stock is currently generating negative
+                   reason = '''   
+                            The stock is currently generating negative
                             annual returns, indicating that principal is 
                             at risk. Conservative investors should sell.'''
                else:
                    rec = "HOLD"
-                   reason = ''' The stock is demonstrating relative stability, 
+                   reason = '''   
+                            The stock is demonstrating relative stability, 
                             offering predictability and consistent 
                             returns to conservative investors. '''
 
@@ -716,16 +724,16 @@ If at any point you wish to exit the program prematurely, please enter 'quit'.
 
         if (newSharpe >= (sharpeRatio * correlation) ):
             print('''
-    This stock improves the risk-return profile of your portfolio. 
-    You should include it within your portfolio.
+This stock improves the risk-return profile of your portfolio. 
+You should include it within your portfolio.
 
             ''')
 
 
         else:
             print('''
-    This stock DOES NOT improve the risk-return profile of your portfolio. 
-    You should NOT include it within your portfolio.
+This stock DOES NOT improve the risk-return profile of your portfolio. 
+You should NOT include it within your portfolio.
             ''')
 
         print("---------------------------------------------------------\n")

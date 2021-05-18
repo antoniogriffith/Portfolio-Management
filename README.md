@@ -80,7 +80,7 @@ Robo-Advisor utilizing user preferences, risk tolerance, and varying investment 
 
     Returns: A pandas variable contain stock returns. 
 ```
-* fetch_RiskFreeRat
+* fetch_RiskFreeRate
 ```
     Purpose: Dynamically setting the risk-free rate. To be used in portfolio construction.
 
@@ -90,7 +90,7 @@ Robo-Advisor utilizing user preferences, risk tolerance, and varying investment 
 ```
 
 
-## Setup
+# Setup
 
 Create and activate a new virtual environment:
 
@@ -117,23 +117,22 @@ pip install -r requirements.txt
 
 ## Step 1: Run the program: - the specific run abbreviated command is as follows:
 
-```
+```sh
 python -m app.manager
-
 ```
 
 ## Step 2: User input will be asked to enter specific preference,including investment strategy and risk tolerance.
 
 ## Step 3: User selects a specific technical analysis to be produced: integrative, speculative, holistic.
 
-```
+```sh
 Integrative: Enter equities you already own to recieve feedback on balancing your portfolio among these stocks.
 
 Speculative: Enter stocks you are interested in to recieve Buy, Sell, Hold recommendations.
 
 Holistic: Enter stocks within your current portfolio. After doing so, you may enter new stocks to recieve their impact on your portfolio.
-
 '''
+
 ### These instrutions can also be found within the program.
 
 

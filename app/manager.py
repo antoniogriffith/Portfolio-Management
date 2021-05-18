@@ -35,6 +35,7 @@ pd.options.display.max_rows = 10
 # 
 import yfinance as yf
 
+
 import csv
 
 
@@ -63,6 +64,16 @@ def negative_sharpe(weights):
     pret = np.dot(weights, mu)
     pvol = np.sqrt(np.dot(weights, np.dot(VarCov, weights.T)))
     return -(pret-rf)/pvol
+
+def minimum_risk(weights):
+    '''
+        Purpose: To construct a portfolio which minimizes the risk of a portfolio.
+
+        Params: A numpy array containing portfolio 'weights'.
+    '''
+    weights = np.array(weights)
+    pvol = np.sqrt(np.dot(weights, np.dot(VarCov, weights.T)))
+    return pvol
 
 def from_CSV(filePath):
     '''
@@ -93,7 +104,7 @@ def from_CSV(filePath):
 
 def stock_upload():
     ''' 
-        Purpose: Extracts user ticker information either manually or via CSV upload/
+        Purpose: Extracts user ticker information either manually or via CSV upload.
 
         Parameters: None
 
@@ -127,7 +138,7 @@ def stock_upload():
         tickers = from_CSV(filePath)
 
     if uploadForm == 'manual':
-        tickers = stock_entry()
+        tickers = stock_entry(comparison=False)
 
     return tickers
     
@@ -136,7 +147,7 @@ def premature_quit(str):
         print("Exiting program now. Please come back soon! Goodbye...\n")
         quit()
 
-def stock_entry():
+def stock_entry(comparison):
         '''
             Purpose: Provides a framework for the manual entry of stock symbols.
 
@@ -147,8 +158,14 @@ def stock_entry():
         '''
         tickers = []
         while True:
-            symbol = input("Please enter stock symbol and enter 'done' when finished: ")
-            symbol = symbol.upper()
+
+            if comparison == True:
+                symbol = input("Please enter a stock symbol to evaluate: ")
+                symbol = symbol.upper()
+
+            else:
+                symbol = input("Please enter stock symbol and enter 'done' when finished: ")
+                symbol = symbol.upper()
 
             premature_quit(symbol)
 
@@ -185,11 +202,110 @@ def stock_entry():
 
                     if (multipleEntries == "NO"):
                         break
-                    
+
                 else:
-                    tickers.append(symbol)   
+                    tickers.append(symbol)
+
+                if comparison == True:
+                    break   
             
         return tickers
+
+def stock_data_retrieval(list):
+    '''
+        Purpose: Uses the Yahoo! Finance API to fetch historical stock data over a specified period of time.
+
+        Parameters: A list containing stock symbols of companies.
+
+        Returns: A pandas dataframe of historical adjusted close prices for the specified companies.
+
+
+    '''
+
+    #
+    # yf.download function retrieves daily prices for a list of securities in a batch and convert that to a Dataframe
+    # here the resulting variable stores the information
+    #
+    raw = yf.download(list, start = "2016-01-01", end = "2018-12-31")
+
+    # extract the adjusted closing prices and store them in a variable named price_data
+    price_data = raw['Adj Close']
+
+    # sort price_data by date in case the price_data was not sorted properly by date
+    price_data.sort_index()
+
+    return price_data
+
+def timeframe_selection(price_data):
+    '''
+        Purpose: Allows the user to specify the intervals with which to construct the returns analysis (daily, monthly, quarterly). Refactors price data accordingly.
+
+        Params: A pandas variable 'price_data' containing historical prices.
+
+        Returns: A string variable 'timing' which is incorprated into the analysis.
+    '''
+
+    attempts = 0
+    while attempts < 4:
+        timingChoice = input("\nConstruct portfolio using daily, monthly, or quarterly: ")
+        timingChoice = timingChoice.lower()
+
+        byDay = ["daily", "day", "d"]
+        byMonth = ["monthly", "month", "m"]
+        byQuarter = ["quarterly", "quarter", "q"]
+
+        if timingChoice in byDay:
+            timing = 252
+            break
+        elif timingChoice in byMonth:
+            timing = 12
+            price_data = price_data.resample(rule = 'm', label = 'right').last()
+            break
+        elif timingChoice in byQuarter:
+            timing = 4
+            price_data = price_data.resample(rule = 'q', label = 'right').last()
+            break
+        else:
+            print("\nERROR: Invalid Entry. Please enter 'daily', 'monthly', or 'quarterly': ")
+        attempts += 1
+
+        if (attempts == 4):
+            print("\nMaximum Attempts Reached: Defaulting to daily returns.")
+            timing = 252
+            break
+
+    return timing
+
+def fetch_returns(price_data):
+    '''
+        Purpose: To calculate historical stock returns.
+
+        Params: A pandas datframe containing historical returns and a 'timing' variable to determine return period
+
+        Returns: A pandas variable contain stock returns. 
+    '''
+
+    #
+    # generate log-returns or continuously compounded returns for all securities and store them in dataframe "rets"
+    rets = np.log(price_data / price_data.shift(1))
+
+    return rets
+
+def fetch_RiskFreeRate():
+    '''
+        Purpose: Dynamically setting the risk-free rate. To be used in portfolio construction.
+
+        Params: None
+
+        Returns: The Risk Free Rate.
+    '''
+
+    riskFree = yf.download("^IRX", start = "2015-01-01", end = "2018-12-31")
+    rf_prices = riskFree["Adj Close"]
+    averageRF = rf_prices.mean()
+    rf = averageRF/100
+
+    return rf
 
 #**************************************************************************
 #***************                  Module 1                      ***********
@@ -203,14 +319,14 @@ print(
 The following program will recieve stock data via CSV upload or manual
 entry (ex. IBM, AAPL, MSFT) and produce various portfoio analysis on that data.
 
-The historical data (from the previous 100 days) will be written to a .csv file
-corresponding to each stock entered.
+The historical data (from the previous three years) will be used to conduct techincal
+analysis on each stock entered, as well as on entire portfolios.
 
 Please be sure to provide accurate stock symbols to avoid receiving an error messages.
 
 -——————————————————————————————————————————————————————————————————————————————
 If at any point you wish to exit the program prematurely, please enter 'quit'.
-''')
+\n''')
 
 #**************************************************************************
 #***********                       Module 2                       *********
@@ -226,7 +342,7 @@ print(
 
         Speculative: Enter stocks you are interested in to recieve Buy, Sell, Hold recommendations.
 
-        Holistic: Enter stocks within your current portfolio. After doing so, you enter stocks to recieve their impact on your portfolio.
+        Holistic: Enter stocks within your current portfolio. After doing so, you may enter new stocks to recieve their impact on your portfolio.
 ''')
 
 ifIntegrative = ['integrative', 'int', 'i']
@@ -242,15 +358,15 @@ while True:
     premature_quit(invApproach)
 
     if invApproach in ifHolistic:
-        invApproach = 'Holistic'
+        invApproach = 'holistic'
         status = True
     
     if invApproach in ifIntegrative:
-        invApproach = 'Integrative'
+        invApproach = 'integrative'
         status = True
 
     if invApproach in ifSpeculative:
-        invApproach = 'Speculative'
+        invApproach = 'speculative'
         status = True
 
     if status == True:
@@ -273,13 +389,13 @@ print(f'''
                             with low growth opportunity.
 
 
-                Moderate: This strategy attempts to find a balance between aggressive and conservative strategies by suggesting
+                Moderate:   This strategy attempts to find a balance between aggressive and conservative strategies by suggesting
                             allocation toward so-called "value" stocks. These stocks have moderate growth potential and
                             are typically undervalued by the market. Returns on this strategy are fairly volatile in the short-term
                             but are favorable in the long-term
 
                 
-            Conservative: Maximizing the safety of the principal investment by accepting little-to-zero risk. This strategy will
+            Conservative:   Maximizing the safety of the principal investment by accepting little-to-zero risk. This strategy will
                             suggest allocation to "sturdy" stocks - i.e. companies with a history of stable cash flows. Returns are
                             considerably lower under this strategy.
 
@@ -297,19 +413,19 @@ while True:
     premature_quit(risk_tolerance)
 
     if risk_tolerance in ifAggressive:
-        risk_tolerance = 'Aggressive'
+        risk_tolerance = 'aggressive'
         status = True
 
     if risk_tolerance in ifModerate:
-        risk_tolerance = 'Moderate'
+        risk_tolerance = 'moderate'
         status = True
 
     if risk_tolerance in ifConservative:
-        risk_tolerance = 'Conservative'
+        risk_tolerance = 'conservative'
         status = True
 
     if status == True:
-        confirmation = f"\nYou have selected a {risk_tolerance} investment strategy."
+        confirmation = f"\nYou have selected the {risk_tolerance} investment strategy."
         print(confirmation)
         break
 
@@ -320,292 +436,353 @@ while True:
 #***************     Data Retrieval of User's Stock Selection   ***********
 #**************************************************************************
 
-tickers = stock_upload()
-
-#
-# yf.download function retrieves daily prices for a list of securities in a batch and convert that to a Dataframe
-# here the resulting variable stores the information
-#
-raw = yf.download(tickers, start = "2014-01-01", end = "2018-12-31")
-
-# extract the adjusted closing prices and store them in a variable named price_data
-price_data = raw['Adj Close']
-
-# sort price_data by date in case the price_data was not sorted properly by date
-price_data.sort_index()
 
 
+#**************************************************************************
+#***********                       Module 4                       *********
+#***************    Portfolio Construction and Recommendations   **********
+#**************************************************************************
+
+if invApproach == 'integrative':
+
+    comparison = False
+
+    print( 
+        '''
+            Which of the following portfolios do you wish to construct:
+
+              1.  Minimum Risk: Your portfolio will be rebalanced based upon the risk tolerance you've indicated.
+
+              2.  Maximizing Risk-Return Profile: This portfolio will provide the greatest level of return per-unit of risk.
+        '''
+    )
+
+    while True:
+        portfolioSelection = input("Select one of the above portfolio constructions. Enter '1', or '2': ")
+
+        premature_quit(portfolioSelection)
+
+        if portfolioSelection != '1' and portfolioSelection != '2':
+            print("\nINVALID  ENTRY! Please try again!")
+        else:
+            break
 
 
+    tickers = stock_upload()
+    price_data = stock_data_retrieval(tickers)
+    rets = fetch_returns(price_data)
+    timing = timeframe_selection(price_data)
+    mu = rets.mean() * timing
+    VarCov = rets.cov() * timing
+    rf = fetch_RiskFreeRate()
+
+    if portfolioSelection == '1':
+
+        numOfAssets = len(rets.keys())
+
+        #
+        # initial guess for the portfolio weights. Typically we start with equal weights as an initial guess
+        #
+        initial_guess = [1/numOfAssets for x in range(numOfAssets)]
+
+        #
+        # portfolio constraint: summation of weights should be 1
+        #
+        cons = ({'type': 'eq', 'fun': lambda weights: np.sum(weights) - 1})
+
+        #
+        # impose additional constraint: does not allow short sale, i.e. all the individual weights between 0 and 1
+        #
+        bnds = tuple((0,1) for x in range(numOfAssets))
+
+        #
+        # now we are ready to use the minimization function
+        # if you are leaving the arguments to "none", then you don't need to include them
+        #
+        opt_mve = sco.minimize(minimum_risk, initial_guess, bounds=bnds, constraints=cons)
+
+        #
+        # to extract the optimal portfolio weights, call it through 'x'
+        #
+        mve_weights = opt_mve['x']
+
+        sharpeRatio = -negative_sharpe(mve_weights)
+        sharpeRatio = round(sharpeRatio, 2)
+        
+        print("---------------------------------------------------------\n")
+        
+        print("OPTIMAL PORTFOLIO CONSTRUCTION FOR MINIMUM RISK:\n")
+
+        index = 0
+        stockWeights = {}
+        for stock in tickers:
+            stockWeights[tickers[index]] = to_Percentage(mve_weights[index])
+            index += 1
+        
+        for item in stockWeights:
+            stockWeights[item] = float(stockWeights[item].replace('%', ""))
+            if stockWeights[item] > 0:
+                print(item.rjust(8), "  ", str(stockWeights[item]) + "%")
+        
+        print("\n---------------------------------------------------------\n")
 
 
+    if portfolioSelection == '2':
+        
+
+        numOfAssets = len(rets.keys())
+
+        #
+        # initial guess for the portfolio weights. Typically we start with equal weights as an initial guess
+        #
+        initial_guess = [1/numOfAssets for x in range(numOfAssets)]
+
+        #
+        # portfolio constraint: summation of weights should be 1
+        #
+        cons = ({'type': 'eq', 'fun': lambda weights: np.sum(weights) - 1})
+
+        #
+        # impose additional constraint: does not allow short sale, i.e. all the individual weights between 0 and 1
+        #
+        bnds = tuple((0,1) for x in range(numOfAssets))
+
+        #
+        # now we are ready to use the minimization function
+        # if you are leaving the arguments to "none", then you don't need to include them
+        #
+        opt_mve = sco.minimize(negative_sharpe, initial_guess, bounds=bnds, constraints=cons)
+
+        #
+        # to extract the optimal portfolio weights, call it through 'x'
+        #
+        mve_weights = opt_mve['x']
+
+        sharpeRatio = -negative_sharpe(mve_weights)
+        sharpeRatio = round(sharpeRatio, 2)
+        
+        print("---------------------------------------------------------\n")
+        
+        print("OPTIMAL PORTFOLIO CONSTRUCTION FOR MAXIMUM RISK-RETURN:\n")
+
+        index = 0
+        stockWeights = {}
+        for stock in tickers:
+            stockWeights[tickers[index]] = to_Percentage(mve_weights[index])
+            index += 1
+        
+        for item in stockWeights:
+            stockWeights[item] = float(stockWeights[item].replace('%', ""))
+            if stockWeights[item] > 0:
+                print(item.rjust(8), "  ", str(stockWeights[item]) + "%")
+        
+        print("\n---------------------------------------------------------\n")
 
 
+if invApproach == 'speculative':
+
+    comparison = False
+    tickers = stock_upload()
+    price_data = stock_data_retrieval(tickers)
+    rets = fetch_returns(price_data)
+    validTickers = list(rets.keys())
+    mu = rets.mean() * 252
+    
+   
+    for stock in validTickers:
+
+       # Recommendation
+       rec = ""
+       reason = ""
+
+       if (risk_tolerance == 'aggressive'):
+       
+           if (mu[stock].mean() >= 0.08):
+               rec = "BUY"
+               reason = ''' The stock is demonstrating upward momentum. 
+                        Asset offers a high-growth proposition.'''
+
+           elif (mu[stock] <= 0.04):
+               rec = "SELL"
+               reason = ''' The stock is demonstrating low growth value, 
+                        currently generating less than 4% annual return 
+                        An aggressive strategy calls for the liquidation 
+                        of low-growth postions.'''
+           else:
+               rec = "HOLD"
+               reason = ''' The stock is generating resonable returns
+                        and should be held until its growth proposition 
+                        is more clear to the market.'''
+
+       elif (risk_tolerance == 'moderate'):
+
+           if (mu[stock].mean() >= 0.06):
+               rec = "BUY"
+               reason = ''' The stock is currently generating greater than 6% annual 
+                        return offering relatively strong growth value to an 
+                        investor willing to incur moderate risk.'''
+
+           elif (mu[stock] <= 0.03):
+               rec = "SELL"
+               reason = ''' The stock is generating less than 3% annual return, 
+                        indicating that the market recognizes little growth value 
+                        in the stock moving forward.'''           
+           else:
+               rec = "HOLD"
+               reason =''' The stock is generating resonable returns
+                        and should be held until its growth proposition 
+                        is more clear to the market.'''
+       else:
+
+           if (mu[stock] >= 0.01):
+               rec = "BUY"
+               reason = ''' The stock is generating moderate returns. 
+                        A conservative strategy focuses on principal 
+                        protection rather than growth.'''
+
+           elif (mu[stock] <= -0.01):
+               rec = "SELL"
+               reason = ''' The stock is currently generating negative
+                        annual returns, indicating that principal is 
+                        at risk. Conservative investors should sell.'''
+           else:
+               rec = "HOLD"
+               reason = ''' The stock is demonstrating relative stability, 
+                        offering predictability and consistent 
+                        returns to conservative investors. '''
+
+       print("\n-----------------------------------------------------------------------------------")
+       print(f"SELECTED SYMBOL: {stock.upper()}")
+       print(f"RISK TOLERANCE: {risk_tolerance.upper()}")
+       print("-----------------------------------------------------------------------------------")
+       print(f"AVERAGE ANNUAL RETURN (3-YEAR SAMPLE): {to_Percentage(float(mu[stock]))}")
+       print("-----------------------------------------------------------------------------------")
+       print(f"RECOMMENDATION: {rec}")
+       print(f"RECOMMENDATION REASON: {reason}")
+       print("-----------------------------------------------------------------------------------")        
 
 
+if invApproach == 'holistic':
 
+    print("Please provide the stocks currently contained within your portfolio.")
+    tickers = stock_upload()
+    price_data = stock_data_retrieval(tickers)
+    rets = fetch_returns(price_data)
+    mu = rets.mean() * 252
+    VarCov = rets.cov() * 252
+    rf = fetch_RiskFreeRate()
+ 
+    #assuming portfolio is well-diversified
+    numOfAssets = len(rets.keys())
 
+    #
+    # assuming equal weighted portfolio to reduce complexity
+    #
+    weights = [1/numOfAssets for x in range(numOfAssets)]
 
+    sharpeRatio = -negative_sharpe(weights)
+    sharpeRatio = round(sharpeRatio, 2)
+    print(sharpeRatio)
 
+    print("\nNow provide a stock you'd like to consider purchasing.")
+    comparison = True
+    newStock = stock_entry(comparison)
+    new_price_data = stock_data_retrieval(newStock)
+    new_rets = fetch_returns(new_price_data)
+    new_mu = new_rets.mean() * 252
 
-numOfAssets = len(tickers)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-attempts = 0
-while attempts < 4:
-    timingChoice = input("\nConstruct portfolio using daily, monthly, or quarterly: ")
-    timingChoice = timingChoice.lower()
-
-    byDay = ["daily", "day", "d"]
-    byMonth = ["monthly", "month", "m"]
-    byQuarter = ["quarterly", "quarter", "q"]
-
-    if timingChoice in byDay:
-        timing = 252
-        break
-    elif timingChoice in byMonth:
-        timing = 12
-        price_data = price_data.resample(rule = 'm', label = 'right').last()
-        break
-    elif timingChoice in byQuarter:
-        timing = 4
-        price_data = price_data.resample(rule = 'q', label = 'right').last()
-        break
+    if len(newStock) == 1:
+        new_VarCov = np.var(new_rets) * 252
     else:
-        print("\nERROR: Invalid Entry. Please enter 'daily', 'monthly', or 'quarterly': ")
-    attempts += 1
+        new_VarCov = new_rets.cov() * 252
 
-if (attempts == 4):
-    print("\nMaximum Attemps Reached: Exiting now. Goodbye...\n")
-    quit()
+    new_numOfAssets = len(newStock)
+    new_weights = [1/new_numOfAssets for x in range(new_numOfAssets)]
+    new_weights = np.array(new_weights)
+    new_pret = np.dot(new_weights, new_mu)
+    new_pvol = np.sqrt(np.dot(new_weights, np.dot(new_VarCov, new_weights.T)))
+    newSharpe = (new_pret-rf)/new_pvol
+    newSharpe = float(newSharpe)
+    newSharpe = round(newSharpe, 2)
+    print(newSharpe)
 
-#
-# generate log-returns or continuously compounded returns for all securities and store them in dataframe "rets"
-# we use the "shift" method in the calculation
-# then we preview the "rets"
-#
-rets = np.log(price_data / price_data.shift(1))
+    rets = rets.mean(axis=1)
+
+    while len(rets) > len(new_rets):
+        rets.drop(rets.tail(1).index,inplace=True)
+    
+    
+    rets.drop(rets.head(1).index,inplace=True)
+    new_rets.drop(new_rets.head(1).index,inplace=True)
 
 
-# Plot the individual securities' returns in the sample period
-rets.cumsum().plot(figsize=(30,15))
+    corrcoef = np.corrcoef(new_rets, rets)
+    corr = corrcoef.sum(axis=0)
+    corr = list(corr)
+    correlation = corr[0]-1
+
+    print("---------------------------------------------------------\n")
+    print("\nRESULT:")
+
+    if (newSharpe >= (sharpeRatio * correlation) ):
+        print('''
+This stock improves the risk-return profile of your portfolio. 
+You should include it within your portfolio.
+        
+        ''')
 
 
-#**************************************************************************
-#***************                 BLOCK 3                       ************
-#**************************************************************************
-#**************************************************************************
+    else:
+        print('''
+This stock DOES NOT improve the risk-return profile of your portfolio. 
+You should NOT include it within your portfolio.
+        ''')
 
-#
-# from daily return to annual return, multiply the daily return by 252
-# from monthly to annaul, multiply monthly by 12
-# from quarterly to annual, multuply quarterly by 4
-#
-mu = rets.mean() * timing
-
-#
-# from daily variance-covariance to annuak variance-covariance, multiply the daily version by 252
-# from monthly to annual, multiply by 12
-# from quarterly to annual, multiply quarterly by 4
-#
-VarCov = rets.cov() * timing
-
-#
-# dynamically setting the risk-free rate via Yahoo Finance library and storing it in the variable "rf"
-#
-print("\n---------------------------------------------------------")
-print("\nNow Collecting U.S. Treasury Data to Determine Risk-Free Rate:")
-riskFree = yf.download("^IRX", start = "2014-01-01", end = "2018-12-31")
-rf_prices = riskFree["Adj Close"]
-averageRF = rf_prices.mean()
-print("\nAverage 3-Month T-Bill Rate:", to_Percentage(averageRF/100))
-rf = averageRF/100
-print("\n---------------------------------------------------------")
-
+    print("---------------------------------------------------------\n")
 
 #**************************************************************************
 #***************                 BLOCK 4                       ************
 #**************************************************************************
 #**************************************************************************
 
+#print("\nSharpe Ratio of the MVE Portfolio: ", sharpeRatio, "\n")
 #
-# initial guess for the portfolio weights. Typically we start with equal weights as an initial guess
+#print("---------------------------------------------------------\n")
 #
-initial_guess = [1/numOfAssets for x in range(numOfAssets)]
-
+#index = 0
+#stockWeights = {}
+#for stock in tickers:
+#    stockWeights[tickers[index]] = to_Percentage(mve_weights[index])
+#    index += 1
 #
-# portfolio constraint: summation of weights should be 1
+#for item in stockWeights:
+#    stockWeights[item] = float(stockWeights[item].replace('%', ""))
+#    if stockWeights[item] > 0:
+#        print(item.rjust(8), "  ", str(stockWeights[item]) + "%")
 #
-cons = ({'type': 'eq', 'fun': lambda weights: np.sum(weights) - 1})
-
+#print("\n---------------------------------------------------------")
 #
-# impose additional constraint: does not allow short sale, i.e. all the individual weights between 0 and 1
+##
+## calculate the MVE portfolio's expected return
+##
+#mve_ret = np.dot(mve_weights, mu)
+#print("\nThe MVE portfolio's expected return is ", to_Percentage(mve_ret))
 #
-bnds = tuple((0,1) for x in range(numOfAssets))
-
+#print("\n---------------------------------------------------------")
 #
-# now we are ready to use the minimization function
-# if you are leaving the arguments to "none", then you don't need to include them
 #
-opt_mve = sco.minimize(negative_sharpe, initial_guess, bounds=bnds, constraints=cons)
-
+##
+## calculate the return volatility for the MVE portfolio
+##
+#mve_vol = np.sqrt(np.dot(mve_weights, np.dot(VarCov, mve_weights.T)))
+#print("\nThe MVE portfolio's expected volatility is ", to_Percentage(mve_vol))
 #
-# to extract the optimal portfolio weights, call it through 'x'
 #
-mve_weights = opt_mve['x']
-
-sharpeRatio = -negative_sharpe(mve_weights)
-
-sharpeRatio = round(sharpeRatio, 3)
-
-print("\nSharpe Ratio of the MVE Portfolio: ", sharpeRatio, "\n")
-
-print("---------------------------------------------------------\n")
-
-index = 0
-stockWeights = {}
-for stock in tickers:
-    stockWeights[tickers[index]] = to_Percentage(mve_weights[index])
-    index += 1
-
-for item in stockWeights:
-    stockWeights[item] = float(stockWeights[item].replace('%', ""))
-    if stockWeights[item] > 0:
-        print(item.rjust(8), "  ", str(stockWeights[item]) + "%")
-
-print("\n---------------------------------------------------------")
-
+#print("\n---------------------------------------------------------")
 #
-# calculate the MVE portfolio's expected return
+##
+## Sharpe Ratio for individual securities
+##
 #
-mve_ret = np.dot(mve_weights, mu)
-print("\nThe MVE portfolio's expected return is ", to_Percentage(mve_ret))
-
-print("\n---------------------------------------------------------")
-
-
-#
-# calculate the return volatility for the MVE portfolio
-#
-mve_vol = np.sqrt(np.dot(mve_weights, np.dot(VarCov, mve_weights.T)))
-print("\nThe MVE portfolio's expected volatility is ", to_Percentage(mve_vol))
-
-
-print("\n---------------------------------------------------------")
-
-#
-# Sharpe Ratio for individual securities
-#
-
-print("\nThe Sharpe Ratios for the individual securities are as follows: \n")
-print((rets.mean()*252-rf)/(np.sqrt(252)*rets.std()))
-
-# plots the MVE portfolio's returns over the sample period
-pd.DataFrame(np.dot(rets, mve_weights), columns = ['MVE Portfolio Return'], index = rets.index).cumsum().plot(figsize = (30,15))
-
-pd.DataFrame(np.dot(rets,mve_weights), columns = ['MVE Portfolio Return'], index = rets.index).dropna().mean()*252
-
-
-#**************************************************************************
-#***************                 BLOCK 5                       ************
-#*****************        OUT OF SAMPLE ANALYSIS          *****************
-#**************************************************************************
-
-#
-# download the out of sample data from 2019-01-01 to 2019-12-31
-#
-
-print("\n\n---------------------------------------------------------")
-
-
-print("\nOutputing 'Out Of Sample' Analysis Now:")
-out_raw = yf.download(tickers, start = "2019-01-01", end = "2019-12-31")
-
-# extract the adjusted closing prices and store them in a variable named out_price_data
-out_price_data = out_raw['Adj Close']
-out_price_data
-
-if timingChoice in byMonth:
-    out_price_data = out_price_data.resample(rule = 'm', label = 'right').last()
-
-elif timingChoice in byQuarter:
-    out_price_data = out_price_data.resample(rule = 'q', label = 'right').last()
-
-#
-# generate out of sample returns
-#
-out_rets = np.log(out_price_data / out_price_data.shift(1))
-
-
-#
-# Out of sample average returns
-#
-# from daily return to annual return, multiply the daily return by 252
-# from monthly to annaul, multiply monthly by 12
-# from quarterly to annual, multuply quarterly by 4
-#
-out_mu = out_rets.mean() * timing
-
-
-#
-# Out of sample variance-covariance matrix
-#
-# from daily variance-covariance to annuak variance-covariance, multiply the daily version by 252
-# from monthly to annual, multiply by 12
-# from quarterly to annual, multiply quarterly by 4
-#
-out_VarCov = out_rets.cov() * timing
-
-#
-# calculate the out of sample return for the MVE portfolio
-#
-out_mve_ret = np.dot(mve_weights, out_mu)
-out_mve_vol = np.sqrt(np.dot(mve_weights, np.dot(out_VarCov, mve_weights.T)))
-out_mve_sharpe = (out_mve_ret - rf)/out_mve_vol
-
-#
-# out of sample Sharpe ratio for the MVE portfolio
-#
-
-print("\n---------------------------------------------------------\n")
-out_mve_sharpe = round(out_mve_sharpe, 3)
-outMVESharpeStr = f"The MVE Portfolio's 'Out of Sample' Sharpe Ratio is {out_mve_sharpe}."
-print(outMVESharpeStr)
-
-#
-# calculate the out of sample return volatility for the MVE portfolio
-#
-print("\n---------------------------------------------------------\n")
-out_mve_ret = to_Percentage(out_mve_ret)
-outMVERetStr = f"The MVE Portfolio's 'Out of Sample' Return is {out_mve_ret}."
-print(outMVERetStr)
-
-print("\n---------------------------------------------------------\n")
-
-#
-# calculate the out of sample return volatility for the MVE portfolio
-#
-out_mve_vol = to_Percentage(out_mve_vol)
-outMVEVolStr = f"\n The MVE Portfolio's 'Out of Sample' Volatility is {out_mve_vol}"
-print(outMVEVolStr)
-
-print("\n---------------------------------------------------------\n")
-#
-# out of sample Sharpe ratio for the individual securities 
-#
-print("\nThe Sharpe Ratios for the individual securities in the 'Out of Sample' period are as follows: \n")
-print((out_rets.mean() * 252 - rf)/(np.sqrt(252) * out_rets.std()))
+#print("\nThe Sharpe Ratios for the individual securities are as follows: \n")
+#print((rets.mean()*252-rf)/(np.sqrt(252)*rets.std()))

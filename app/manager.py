@@ -6,9 +6,6 @@
 #**************************************************************************
 
 # the following code is for importing some plotting libraries for later use
-#
-from pylab import plt
-plt.style.use('ggplot')
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 mpl.rcParams['font.family'] = 'serif'

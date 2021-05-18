@@ -1,0 +1,53 @@
+id,Company Name,Ticker,Sector
+1,"Apple, Inc.",AAPL,TECHNOLOGY
+2,"Facebook, Inc.",FB,TECHNOLOGY
+3,Microsoft Corp.,MSFT,TECHNOLOGY
+4,"Netflix, Inc.",NFLX,TECHNOLOGY
+5,"Paypal, Inc.",PYPL,TECHNOLOGY
+6,"Amazon.com, Inc.",AMZN,TECHNOLOGY
+7,"Visa, Inc.",V,TECHNOLOGY
+8,"Mastercard, Inc.",MA,TECHNOLOGY
+9,Exxon Mobil Corporation,XOM,ENERGY
+10,"Plug Power, Inc.",PLUG,ENERGY
+11,"Enphase Energy, Inc.",ENPH,ENERGY
+12,Simon Property Group,SPG,REIT
+13,American Tower,AMT,REIT
+14,Crown Castle,CCI,REIT
+15,Digital Realty Trust,DLR,REIT
+16,United Healthcare,UNH,HEALTHCARE
+17,"Pfizer, Inc.",PFE,HEALTHCARE
+18,Amgen,AMGN,HEALTHCARE
+19,Bristol Myers Squibb,BMY,HEALTHCARE
+20,Viacom-CBS,VIAC,M&T
+21,The Walt Disney Company,DIS,M&T
+22,"Verizon Communications, Inc,",VZ,M&T
+23,"T-Mobile US, Inc.",TMUS,M&T
+24,General Motors Company ,GM,TRANSPORTATION
+25,Ford Motor Company,F,TRANSPORTATION
+26,FedEx Corp.,FDX,TRANSPORTATION
+27,United Parcel Service,UPS,TRANSPORTATION
+28,Boeing Corp.,BA,TRANSPORTATION
+29,Delta Air Lines,DAL,TRANSPORTATION
+30,AMC Theatres,AMC,ENTERTAINMENT
+31,MGM Resorts International ,MGM,ENTERTAINMENT
+32,Air Lease Corp.,AL,INDUSTRIAL 
+33,Commercial  Metals Co.,CMC,INDUSTRIAL 
+34,"Nike, Inc.",NKE,RETAIL
+35,Lululemon Athletica ,LULU,RETAIL
+36,Goldman Sachs,GS,FINANCIAL 
+37,Bank of America,BAC,FINANCIAL 
+38,Citigroup ,C,FINANCIAL 
+39,Wells Fargo,WFC,FINANCIAL 
+40,Gold,GC=F,COMMODITIES
+41,Oil,CL=F,COMMODITIES
+42,Lithium,LTUM,COMMODITIES
+43,Carnival Corp.,CCL,H&T
+44,Royal Caribbean Cruises LTD,RCL,H&T
+45,Marriot International ,MAR,H&T
+46,Chipotle Mexican Grill,CMG,FOOD&BEV
+47,Coca-Cola Co.,KO,FOOD&BEV
+48,"Pepsico, Inc.",PEP,FOOD&BEV
+49,Toyota Motor Corp.,T,TRANSPORTATION
+50,"Walmart, Inc.",WMT,RETAIL
+51,Clean Energy ETF,ICLN,ETF
+52,Wheat,KE=F,COMMODITIES

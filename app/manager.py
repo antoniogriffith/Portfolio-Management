@@ -18,7 +18,6 @@ mpl.rcParams['font.family'] = 'serif'
 #
 import scipy.optimize as sco
 
-#
 # now we import numpy and pandas libraries
 # numpy is going to be very helpful when we deal with a large number of assets through vector/matrix algebra
 import numpy as np
@@ -307,482 +306,430 @@ def fetch_RiskFreeRate():
 
     return rf
 
-#**************************************************************************
-#***************                  Module 1                      ***********
-#********************  Introduction to the Application  *******************
-#**************************************************************************
 
-#Welcome Message
-print("\n\nWelcome to Planalytics LLC. Securities Manangement Software!")
-print(
-'''
-The following program will recieve stock data via CSV upload or manual
-entry (ex. IBM, AAPL, MSFT) and produce various portfoio analysis on that data.
+if __name__ == "__main__":
 
-The historical data (from the previous three years) will be used to conduct techincal
-analysis on each stock entered, as well as on entire portfolios.
+    #**************************************************************************
+    #***************                  Module 1                      ***********
+    #********************  Introduction to the Application  *******************
+    #**************************************************************************
 
-Please be sure to provide accurate stock symbols to avoid receiving an error messages.
+    #Welcome Message
+    print("\n\nWelcome to Planalytics LLC. Securities Manangement Software!")
+    print(
+    '''
+    The following program will recieve stock data via CSV upload or manual
+    entry (ex. IBM, AAPL, MSFT) and produce various portfoio analysis on that data.
 
--——————————————————————————————————————————————————————————————————————————————
-If at any point you wish to exit the program prematurely, please enter 'quit'.
-\n''')
+    The historical data (from the previous three years) will be used to conduct techincal
+    analysis on each stock entered, as well as on entire portfolios.
 
-#**************************************************************************
-#***********                       Module 2                       *********
-#***************       Data Retrieval of User Preferences   ***************
-#**************************************************************************
+    Please be sure to provide accurate stock symbols to avoid receiving an error messages.
 
-#Investment Approach
-print(
-    
-    '''This software offers a number of approaches for portfolio management. Which of the following do you prefer:
+    -——————————————————————————————————————————————————————————————————————————————
+    If at any point you wish to exit the program prematurely, please enter 'quit'.
+    \n''')
 
-        Integrative: Enter equities you already own to recieve feedback on balancing your portfolio among these stocks.
+    #**************************************************************************
+    #***********                       Module 2                       *********
+    #***************       Data Retrieval of User Preferences   ***************
+    #**************************************************************************
 
-        Speculative: Enter stocks you are interested in to recieve Buy, Sell, Hold recommendations.
+    #Investment Approach
+    print(
 
-        Holistic: Enter stocks within your current portfolio. After doing so, you may enter new stocks to recieve their impact on your portfolio.
-''')
+        '''This software offers a number of approaches for portfolio management. Which of the following do you prefer:
 
-ifIntegrative = ['integrative', 'int', 'i']
-ifSpeculative = ['speculative', 'spec', 's']
-ifHolistic = ['holistic', 'hol', 'h']
-status = False
+            Integrative: Enter equities you already own to recieve feedback on balancing your portfolio among these stocks.
 
-while True:
+            Speculative: Enter stocks you are interested in to recieve Buy, Sell, Hold recommendations.
 
-    invApproach = input("Please enter 'Integrative', 'Speculative' or 'Holistic': ")
-    invApproach = invApproach.lower()
+            Holistic: Enter stocks within your current portfolio. After doing so, you may enter new stocks to recieve their impact on your portfolio.
+    ''')
 
-    premature_quit(invApproach)
-
-    if invApproach in ifHolistic:
-        invApproach = 'holistic'
-        status = True
-    
-    if invApproach in ifIntegrative:
-        invApproach = 'integrative'
-        status = True
-
-    if invApproach in ifSpeculative:
-        invApproach = 'speculative'
-        status = True
-
-    if status == True:
-        confirmation = f"\nYou have selected the {invApproach} approach."
-        print(confirmation)
-        break
-
-    print("ERROR: Invalid entry. Try again!\n")
-
-# Investor Risk Tolerance
-print(f'''
-
-                                                    INVESTMENT STRATEGY
-
-
-        In order for us to determine an investment strategy for the {invApproach} approach, we must first know your risk tolerance.
-
-                Aggressive: Maximizing returns by taking a high degree of risk. This strategy will focus on capital appreciation
-                            by recommending the purchase of what are commonly know as "high-growth" stocks and the liquidation of stocks
-                            with low growth opportunity.
-
-
-                Moderate:   This strategy attempts to find a balance between aggressive and conservative strategies by suggesting
-                            allocation toward so-called "value" stocks. These stocks have moderate growth potential and
-                            are typically undervalued by the market. Returns on this strategy are fairly volatile in the short-term
-                            but are favorable in the long-term
-
-                
-            Conservative:   Maximizing the safety of the principal investment by accepting little-to-zero risk. This strategy will
-                            suggest allocation to "sturdy" stocks - i.e. companies with a history of stable cash flows. Returns are
-                            considerably lower under this strategy.
-
-        ''')
-
-ifAggressive = ['aggressive', 'a']
-ifModerate = ['moderate', 'm']
-ifConservative = ['conservative', 'c']
-status = False
-
-while True:
-    risk_tolerance = input("Please select an investment strategy. Enter 'Aggressive', 'Moderate, or 'Conservative': ")
-    risk_tolerance = risk_tolerance.lower()
-
-    premature_quit(risk_tolerance)
-
-    if risk_tolerance in ifAggressive:
-        risk_tolerance = 'aggressive'
-        status = True
-
-    if risk_tolerance in ifModerate:
-        risk_tolerance = 'moderate'
-        status = True
-
-    if risk_tolerance in ifConservative:
-        risk_tolerance = 'conservative'
-        status = True
-
-    if status == True:
-        confirmation = f"\nYou have selected the {risk_tolerance} investment strategy."
-        print(confirmation)
-        break
-
-    print("ERROR: Invalid entry. Try again!\n")
-
-#**************************************************************************
-#***********                       Module 3                       *********
-#***************     Data Retrieval of User's Stock Selection   ***********
-#**************************************************************************
-
-
-
-#**************************************************************************
-#***********                       Module 4                       *********
-#***************    Portfolio Construction and Recommendations   **********
-#**************************************************************************
-
-if invApproach == 'integrative':
-
-    comparison = False
-
-    print( 
-        '''
-            Which of the following portfolios do you wish to construct:
-
-              1.  Minimum Risk: Your portfolio will be rebalanced based upon the risk tolerance you've indicated.
-
-              2.  Maximizing Risk-Return Profile: This portfolio will provide the greatest level of return per-unit of risk.
-        '''
-    )
+    ifIntegrative = ['integrative', 'int', 'i']
+    ifSpeculative = ['speculative', 'spec', 's']
+    ifHolistic = ['holistic', 'hol', 'h']
+    status = False
 
     while True:
-        portfolioSelection = input("Select one of the above portfolio constructions. Enter '1', or '2': ")
 
-        premature_quit(portfolioSelection)
+        invApproach = input("Please enter 'Integrative', 'Speculative' or 'Holistic': ")
+        invApproach = invApproach.lower()
 
-        if portfolioSelection != '1' and portfolioSelection != '2':
-            print("\nINVALID  ENTRY! Please try again!")
-        else:
+        premature_quit(invApproach)
+
+        if invApproach in ifHolistic:
+            invApproach = 'holistic'
+            status = True
+
+        if invApproach in ifIntegrative:
+            invApproach = 'integrative'
+            status = True
+
+        if invApproach in ifSpeculative:
+            invApproach = 'speculative'
+            status = True
+
+        if status == True:
+            confirmation = f"\nYou have selected the {invApproach} approach."
+            print(confirmation)
             break
 
+        print("ERROR: Invalid entry. Try again!\n")
 
-    tickers = stock_upload()
-    price_data = stock_data_retrieval(tickers)
-    rets = fetch_returns(price_data)
-    timing = timeframe_selection(price_data)
-    mu = rets.mean() * timing
-    VarCov = rets.cov() * timing
-    rf = fetch_RiskFreeRate()
+    # Investor Risk Tolerance
+    print(f'''
 
-    if portfolioSelection == '1':
+                                                        INVESTMENT STRATEGY
 
+
+            In order for us to determine an investment strategy for the {invApproach} approach, we must first know your risk tolerance.
+
+                    Aggressive: Maximizing returns by taking a high degree of risk. This strategy will focus on capital appreciation
+                                by recommending the purchase of what are commonly know as "high-growth" stocks and the liquidation of stocks
+                                with low growth opportunity.
+
+
+                    Moderate:   This strategy attempts to find a balance between aggressive and conservative strategies by suggesting
+                                allocation toward so-called "value" stocks. These stocks have moderate growth potential and
+                                are typically undervalued by the market. Returns on this strategy are fairly volatile in the short-term
+                                but are favorable in the long-term
+
+
+                Conservative:   Maximizing the safety of the principal investment by accepting little-to-zero risk. This strategy will
+                                suggest allocation to "sturdy" stocks - i.e. companies with a history of stable cash flows. Returns are
+                                considerably lower under this strategy.
+
+            ''')
+
+    ifAggressive = ['aggressive', 'a']
+    ifModerate = ['moderate', 'm']
+    ifConservative = ['conservative', 'c']
+    status = False
+
+    while True:
+        risk_tolerance = input("Please select an investment strategy. Enter 'Aggressive', 'Moderate, or 'Conservative': ")
+        risk_tolerance = risk_tolerance.lower()
+
+        premature_quit(risk_tolerance)
+
+        if risk_tolerance in ifAggressive:
+            risk_tolerance = 'aggressive'
+            status = True
+
+        if risk_tolerance in ifModerate:
+            risk_tolerance = 'moderate'
+            status = True
+
+        if risk_tolerance in ifConservative:
+            risk_tolerance = 'conservative'
+            status = True
+
+        if status == True:
+            confirmation = f"\nYou have selected the {risk_tolerance} investment strategy."
+            print(confirmation)
+            break
+
+        print("ERROR: Invalid entry. Try again!\n")
+
+
+    #**************************************************************************
+    #***********                       Module 3                       *********
+    #***************    Portfolio Construction and Recommendations   **********
+    #**************************************************************************
+
+    if invApproach == 'integrative':
+
+        comparison = False
+
+        print( 
+            '''
+                Which of the following portfolios do you wish to construct:
+
+                  1.  Minimum Risk: Your portfolio will be rebalanced based upon the risk tolerance you've indicated.
+
+                  2.  Maximizing Risk-Return Profile: This portfolio will provide the greatest level of return per-unit of risk.
+            '''
+        )
+
+        while True:
+            portfolioSelection = input("Select one of the above portfolio constructions. Enter '1', or '2': ")
+
+            premature_quit(portfolioSelection)
+
+            if portfolioSelection != '1' and portfolioSelection != '2':
+                print("\nINVALID  ENTRY! Please try again!")
+            else:
+                break
+
+
+        tickers = stock_upload()
+        price_data = stock_data_retrieval(tickers)
+        rets = fetch_returns(price_data)
+        timing = timeframe_selection(price_data)
+        mu = rets.mean() * timing
+        VarCov = rets.cov() * timing
+        rf = fetch_RiskFreeRate()
+
+        if portfolioSelection == '1':
+
+            numOfAssets = len(rets.keys())
+
+            #
+            # initial guess for the portfolio weights. Typically we start with equal weights as an initial guess
+            #
+            initial_guess = [1/numOfAssets for x in range(numOfAssets)]
+
+            #
+            # portfolio constraint: summation of weights should be 1
+            #
+            cons = ({'type': 'eq', 'fun': lambda weights: np.sum(weights) - 1})
+
+            #
+            # impose additional constraint: does not allow short sale, i.e. all the individual weights between 0 and 1
+            #
+            bnds = tuple((0,1) for x in range(numOfAssets))
+
+            #
+            # now we are ready to use the minimization function
+            # if you are leaving the arguments to "none", then you don't need to include them
+            #
+            opt_mve = sco.minimize(minimum_risk, initial_guess, bounds=bnds, constraints=cons)
+
+            #
+            # to extract the optimal portfolio weights, call it through 'x'
+            #
+            mve_weights = opt_mve['x']
+
+            sharpeRatio = -negative_sharpe(mve_weights)
+            sharpeRatio = round(sharpeRatio, 2)
+
+            print("---------------------------------------------------------\n")
+
+            print("OPTIMAL PORTFOLIO CONSTRUCTION FOR MINIMUM RISK:\n")
+
+            index = 0
+            stockWeights = {}
+            for stock in tickers:
+                stockWeights[tickers[index]] = to_Percentage(mve_weights[index])
+                index += 1
+
+            for item in stockWeights:
+                stockWeights[item] = float(stockWeights[item].replace('%', ""))
+                if stockWeights[item] > 0:
+                    print(item.rjust(8), "  ", str(stockWeights[item]) + "%")
+
+            print("\n---------------------------------------------------------\n")
+
+
+        if portfolioSelection == '2':
+
+
+            numOfAssets = len(rets.keys())
+
+            #
+            # initial guess for the portfolio weights. Typically we start with equal weights as an initial guess
+            #
+            initial_guess = [1/numOfAssets for x in range(numOfAssets)]
+
+            #
+            # portfolio constraint: summation of weights should be 1
+            #
+            cons = ({'type': 'eq', 'fun': lambda weights: np.sum(weights) - 1})
+
+            #
+            # impose additional constraint: does not allow short sale, i.e. all the individual weights between 0 and 1
+            #
+            bnds = tuple((0,1) for x in range(numOfAssets))
+
+            #
+            # now we are ready to use the minimization function
+            # if you are leaving the arguments to "none", then you don't need to include them
+            #
+            opt_mve = sco.minimize(negative_sharpe, initial_guess, bounds=bnds, constraints=cons)
+
+            #
+            # to extract the optimal portfolio weights, call it through 'x'
+            #
+            mve_weights = opt_mve['x']
+
+            sharpeRatio = -negative_sharpe(mve_weights)
+            sharpeRatio = round(sharpeRatio, 2)
+
+            print("---------------------------------------------------------\n")
+
+            print("OPTIMAL PORTFOLIO CONSTRUCTION FOR MAXIMUM RISK-RETURN:\n")
+
+            index = 0
+            stockWeights = {}
+            for stock in tickers:
+                stockWeights[tickers[index]] = to_Percentage(mve_weights[index])
+                index += 1
+
+            for item in stockWeights:
+                stockWeights[item] = float(stockWeights[item].replace('%', ""))
+                if stockWeights[item] > 0:
+                    print(item.rjust(8), "  ", str(stockWeights[item]) + "%")
+
+            print("\n---------------------------------------------------------\n")
+
+
+    if invApproach == 'speculative':
+
+        comparison = False
+        tickers = stock_upload()
+        price_data = stock_data_retrieval(tickers)
+        rets = fetch_returns(price_data)
+        validTickers = list(rets.keys())
+        mu = rets.mean() * 252
+
+    
+        for stock in validTickers:
+
+           # Recommendation
+           rec = ""
+           reason = ""
+
+           if (risk_tolerance == 'aggressive'):
+           
+               if (mu[stock].mean() >= 0.08):
+                   rec = "BUY"
+                   reason = ''' The stock is demonstrating upward momentum. 
+                            Asset offers a high-growth proposition.'''
+
+               elif (mu[stock] <= 0.04):
+                   rec = "SELL"
+                   reason = ''' The stock is demonstrating low growth value, 
+                            currently generating less than 4% annual return 
+                            An aggressive strategy calls for the liquidation 
+                            of low-growth postions.'''
+               else:
+                   rec = "HOLD"
+                   reason = ''' The stock is generating resonable returns
+                            and should be held until its growth proposition 
+                            is more clear to the market.'''
+
+           elif (risk_tolerance == 'moderate'):
+
+               if (mu[stock].mean() >= 0.06):
+                   rec = "BUY"
+                   reason = ''' The stock is currently generating greater than 6% annual 
+                            return offering relatively strong growth value to an 
+                            investor willing to incur moderate risk.'''
+
+               elif (mu[stock] <= 0.03):
+                   rec = "SELL"
+                   reason = ''' The stock is generating less than 3% annual return, 
+                            indicating that the market recognizes little growth value 
+                            in the stock moving forward.'''           
+               else:
+                   rec = "HOLD"
+                   reason =''' The stock is generating resonable returns
+                            and should be held until its growth proposition 
+                            is more clear to the market.'''
+           else:
+
+               if (mu[stock] >= 0.01):
+                   rec = "BUY"
+                   reason = ''' The stock is generating moderate returns. 
+                            A conservative strategy focuses on principal 
+                            protection rather than growth.'''
+
+               elif (mu[stock] <= -0.01):
+                   rec = "SELL"
+                   reason = ''' The stock is currently generating negative
+                            annual returns, indicating that principal is 
+                            at risk. Conservative investors should sell.'''
+               else:
+                   rec = "HOLD"
+                   reason = ''' The stock is demonstrating relative stability, 
+                            offering predictability and consistent 
+                            returns to conservative investors. '''
+
+           print("\n-----------------------------------------------------------------------------------")
+           print(f"SELECTED SYMBOL: {stock.upper()}")
+           print(f"RISK TOLERANCE: {risk_tolerance.upper()}")
+           print("-----------------------------------------------------------------------------------")
+           print(f"AVERAGE ANNUAL RETURN (3-YEAR SAMPLE): {to_Percentage(float(mu[stock]))}")
+           print("-----------------------------------------------------------------------------------")
+           print(f"RECOMMENDATION: {rec}")
+           print(f"RECOMMENDATION REASON: {reason}")
+           print("-----------------------------------------------------------------------------------")        
+
+
+    if invApproach == 'holistic':
+
+        print("Please provide the stocks currently contained within your portfolio.")
+        tickers = stock_upload()
+        price_data = stock_data_retrieval(tickers)
+        rets = fetch_returns(price_data)
+        mu = rets.mean() * 252
+        VarCov = rets.cov() * 252
+        rf = fetch_RiskFreeRate()
+    
+        #assuming portfolio is well-diversified
         numOfAssets = len(rets.keys())
 
         #
-        # initial guess for the portfolio weights. Typically we start with equal weights as an initial guess
+        # assuming equal weighted portfolio to reduce complexity
         #
-        initial_guess = [1/numOfAssets for x in range(numOfAssets)]
+        weights = [1/numOfAssets for x in range(numOfAssets)]
 
-        #
-        # portfolio constraint: summation of weights should be 1
-        #
-        cons = ({'type': 'eq', 'fun': lambda weights: np.sum(weights) - 1})
-
-        #
-        # impose additional constraint: does not allow short sale, i.e. all the individual weights between 0 and 1
-        #
-        bnds = tuple((0,1) for x in range(numOfAssets))
-
-        #
-        # now we are ready to use the minimization function
-        # if you are leaving the arguments to "none", then you don't need to include them
-        #
-        opt_mve = sco.minimize(minimum_risk, initial_guess, bounds=bnds, constraints=cons)
-
-        #
-        # to extract the optimal portfolio weights, call it through 'x'
-        #
-        mve_weights = opt_mve['x']
-
-        sharpeRatio = -negative_sharpe(mve_weights)
+        sharpeRatio = -negative_sharpe(weights)
         sharpeRatio = round(sharpeRatio, 2)
-        
+
+        print("\nNow provide a stock you'd like to consider purchasing.")
+        comparison = True
+        newStock = stock_entry(comparison)
+        new_price_data = stock_data_retrieval(newStock)
+        new_rets = fetch_returns(new_price_data)
+        new_mu = new_rets.mean() * 252
+
+        if len(newStock) == 1:
+            new_VarCov = np.var(new_rets) * 252
+        else:
+            new_VarCov = new_rets.cov() * 252
+
+        new_numOfAssets = len(newStock)
+        new_weights = [1/new_numOfAssets for x in range(new_numOfAssets)]
+        new_weights = np.array(new_weights)
+        new_pret = np.dot(new_weights, new_mu)
+        new_pvol = np.sqrt(np.dot(new_weights, np.dot(new_VarCov, new_weights.T)))
+        newSharpe = (new_pret-rf)/new_pvol
+        newSharpe = float(newSharpe)
+        newSharpe = round(newSharpe, 2)
+
+        rets = rets.mean(axis=1)
+
+        while len(rets) > len(new_rets):
+            rets.drop(rets.tail(1).index,inplace=True)
+
+
+        rets.drop(rets.head(1).index,inplace=True)
+        new_rets.drop(new_rets.head(1).index,inplace=True)
+
+
+        corrcoef = np.corrcoef(new_rets, rets)
+        corr = corrcoef.sum(axis=0)
+        corr = list(corr)
+        correlation = corr[0]-1
+
         print("---------------------------------------------------------\n")
-        
-        print("OPTIMAL PORTFOLIO CONSTRUCTION FOR MINIMUM RISK:\n")
+        print("\nRESULT:")
 
-        index = 0
-        stockWeights = {}
-        for stock in tickers:
-            stockWeights[tickers[index]] = to_Percentage(mve_weights[index])
-            index += 1
-        
-        for item in stockWeights:
-            stockWeights[item] = float(stockWeights[item].replace('%', ""))
-            if stockWeights[item] > 0:
-                print(item.rjust(8), "  ", str(stockWeights[item]) + "%")
-        
-        print("\n---------------------------------------------------------\n")
+        if (newSharpe >= (sharpeRatio * correlation) ):
+            print('''
+    This stock improves the risk-return profile of your portfolio. 
+    You should include it within your portfolio.
+
+            ''')
 
 
-    if portfolioSelection == '2':
-        
+        else:
+            print('''
+    This stock DOES NOT improve the risk-return profile of your portfolio. 
+    You should NOT include it within your portfolio.
+            ''')
 
-        numOfAssets = len(rets.keys())
-
-        #
-        # initial guess for the portfolio weights. Typically we start with equal weights as an initial guess
-        #
-        initial_guess = [1/numOfAssets for x in range(numOfAssets)]
-
-        #
-        # portfolio constraint: summation of weights should be 1
-        #
-        cons = ({'type': 'eq', 'fun': lambda weights: np.sum(weights) - 1})
-
-        #
-        # impose additional constraint: does not allow short sale, i.e. all the individual weights between 0 and 1
-        #
-        bnds = tuple((0,1) for x in range(numOfAssets))
-
-        #
-        # now we are ready to use the minimization function
-        # if you are leaving the arguments to "none", then you don't need to include them
-        #
-        opt_mve = sco.minimize(negative_sharpe, initial_guess, bounds=bnds, constraints=cons)
-
-        #
-        # to extract the optimal portfolio weights, call it through 'x'
-        #
-        mve_weights = opt_mve['x']
-
-        sharpeRatio = -negative_sharpe(mve_weights)
-        sharpeRatio = round(sharpeRatio, 2)
-        
         print("---------------------------------------------------------\n")
-        
-        print("OPTIMAL PORTFOLIO CONSTRUCTION FOR MAXIMUM RISK-RETURN:\n")
-
-        index = 0
-        stockWeights = {}
-        for stock in tickers:
-            stockWeights[tickers[index]] = to_Percentage(mve_weights[index])
-            index += 1
-        
-        for item in stockWeights:
-            stockWeights[item] = float(stockWeights[item].replace('%', ""))
-            if stockWeights[item] > 0:
-                print(item.rjust(8), "  ", str(stockWeights[item]) + "%")
-        
-        print("\n---------------------------------------------------------\n")
-
-
-if invApproach == 'speculative':
-
-    comparison = False
-    tickers = stock_upload()
-    price_data = stock_data_retrieval(tickers)
-    rets = fetch_returns(price_data)
-    validTickers = list(rets.keys())
-    mu = rets.mean() * 252
-    
-   
-    for stock in validTickers:
-
-       # Recommendation
-       rec = ""
-       reason = ""
-
-       if (risk_tolerance == 'aggressive'):
-       
-           if (mu[stock].mean() >= 0.08):
-               rec = "BUY"
-               reason = ''' The stock is demonstrating upward momentum. 
-                        Asset offers a high-growth proposition.'''
-
-           elif (mu[stock] <= 0.04):
-               rec = "SELL"
-               reason = ''' The stock is demonstrating low growth value, 
-                        currently generating less than 4% annual return 
-                        An aggressive strategy calls for the liquidation 
-                        of low-growth postions.'''
-           else:
-               rec = "HOLD"
-               reason = ''' The stock is generating resonable returns
-                        and should be held until its growth proposition 
-                        is more clear to the market.'''
-
-       elif (risk_tolerance == 'moderate'):
-
-           if (mu[stock].mean() >= 0.06):
-               rec = "BUY"
-               reason = ''' The stock is currently generating greater than 6% annual 
-                        return offering relatively strong growth value to an 
-                        investor willing to incur moderate risk.'''
-
-           elif (mu[stock] <= 0.03):
-               rec = "SELL"
-               reason = ''' The stock is generating less than 3% annual return, 
-                        indicating that the market recognizes little growth value 
-                        in the stock moving forward.'''           
-           else:
-               rec = "HOLD"
-               reason =''' The stock is generating resonable returns
-                        and should be held until its growth proposition 
-                        is more clear to the market.'''
-       else:
-
-           if (mu[stock] >= 0.01):
-               rec = "BUY"
-               reason = ''' The stock is generating moderate returns. 
-                        A conservative strategy focuses on principal 
-                        protection rather than growth.'''
-
-           elif (mu[stock] <= -0.01):
-               rec = "SELL"
-               reason = ''' The stock is currently generating negative
-                        annual returns, indicating that principal is 
-                        at risk. Conservative investors should sell.'''
-           else:
-               rec = "HOLD"
-               reason = ''' The stock is demonstrating relative stability, 
-                        offering predictability and consistent 
-                        returns to conservative investors. '''
-
-       print("\n-----------------------------------------------------------------------------------")
-       print(f"SELECTED SYMBOL: {stock.upper()}")
-       print(f"RISK TOLERANCE: {risk_tolerance.upper()}")
-       print("-----------------------------------------------------------------------------------")
-       print(f"AVERAGE ANNUAL RETURN (3-YEAR SAMPLE): {to_Percentage(float(mu[stock]))}")
-       print("-----------------------------------------------------------------------------------")
-       print(f"RECOMMENDATION: {rec}")
-       print(f"RECOMMENDATION REASON: {reason}")
-       print("-----------------------------------------------------------------------------------")        
-
-
-if invApproach == 'holistic':
-
-    print("Please provide the stocks currently contained within your portfolio.")
-    tickers = stock_upload()
-    price_data = stock_data_retrieval(tickers)
-    rets = fetch_returns(price_data)
-    mu = rets.mean() * 252
-    VarCov = rets.cov() * 252
-    rf = fetch_RiskFreeRate()
- 
-    #assuming portfolio is well-diversified
-    numOfAssets = len(rets.keys())
-
-    #
-    # assuming equal weighted portfolio to reduce complexity
-    #
-    weights = [1/numOfAssets for x in range(numOfAssets)]
-
-    sharpeRatio = -negative_sharpe(weights)
-    sharpeRatio = round(sharpeRatio, 2)
-    print(sharpeRatio)
-
-    print("\nNow provide a stock you'd like to consider purchasing.")
-    comparison = True
-    newStock = stock_entry(comparison)
-    new_price_data = stock_data_retrieval(newStock)
-    new_rets = fetch_returns(new_price_data)
-    new_mu = new_rets.mean() * 252
-
-    if len(newStock) == 1:
-        new_VarCov = np.var(new_rets) * 252
-    else:
-        new_VarCov = new_rets.cov() * 252
-
-    new_numOfAssets = len(newStock)
-    new_weights = [1/new_numOfAssets for x in range(new_numOfAssets)]
-    new_weights = np.array(new_weights)
-    new_pret = np.dot(new_weights, new_mu)
-    new_pvol = np.sqrt(np.dot(new_weights, np.dot(new_VarCov, new_weights.T)))
-    newSharpe = (new_pret-rf)/new_pvol
-    newSharpe = float(newSharpe)
-    newSharpe = round(newSharpe, 2)
-    print(newSharpe)
-
-    rets = rets.mean(axis=1)
-
-    while len(rets) > len(new_rets):
-        rets.drop(rets.tail(1).index,inplace=True)
-    
-    
-    rets.drop(rets.head(1).index,inplace=True)
-    new_rets.drop(new_rets.head(1).index,inplace=True)
-
-
-    corrcoef = np.corrcoef(new_rets, rets)
-    corr = corrcoef.sum(axis=0)
-    corr = list(corr)
-    correlation = corr[0]-1
-
-    print("---------------------------------------------------------\n")
-    print("\nRESULT:")
-
-    if (newSharpe >= (sharpeRatio * correlation) ):
-        print('''
-This stock improves the risk-return profile of your portfolio. 
-You should include it within your portfolio.
-        
-        ''')
-
-
-    else:
-        print('''
-This stock DOES NOT improve the risk-return profile of your portfolio. 
-You should NOT include it within your portfolio.
-        ''')
-
-    print("---------------------------------------------------------\n")
-
-#**************************************************************************
-#***************                 BLOCK 4                       ************
-#**************************************************************************
-#**************************************************************************
-
-#print("\nSharpe Ratio of the MVE Portfolio: ", sharpeRatio, "\n")
-#
-#print("---------------------------------------------------------\n")
-#
-#index = 0
-#stockWeights = {}
-#for stock in tickers:
-#    stockWeights[tickers[index]] = to_Percentage(mve_weights[index])
-#    index += 1
-#
-#for item in stockWeights:
-#    stockWeights[item] = float(stockWeights[item].replace('%', ""))
-#    if stockWeights[item] > 0:
-#        print(item.rjust(8), "  ", str(stockWeights[item]) + "%")
-#
-#print("\n---------------------------------------------------------")
-#
-##
-## calculate the MVE portfolio's expected return
-##
-#mve_ret = np.dot(mve_weights, mu)
-#print("\nThe MVE portfolio's expected return is ", to_Percentage(mve_ret))
-#
-#print("\n---------------------------------------------------------")
-#
-#
-##
-## calculate the return volatility for the MVE portfolio
-##
-#mve_vol = np.sqrt(np.dot(mve_weights, np.dot(VarCov, mve_weights.T)))
-#print("\nThe MVE portfolio's expected volatility is ", to_Percentage(mve_vol))
-#
-#
-#print("\n---------------------------------------------------------")
-#
-##
-## Sharpe Ratio for individual securities
-##
-#
-#print("\nThe Sharpe Ratios for the individual securities are as follows: \n")
-#print((rets.mean()*252-rf)/(np.sqrt(252)*rets.std()))

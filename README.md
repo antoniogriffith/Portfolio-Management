@@ -131,7 +131,7 @@ Integrative: Enter equities you already own to recieve feedback on balancing you
 Speculative: Enter stocks you are interested in to recieve Buy, Sell, Hold recommendations.
 
 Holistic: Enter stocks within your current portfolio. After doing so, you may enter new stocks to recieve their impact on your portfolio.
-'''
+```
 
 ### These instrutions can also be found within the program.
 
@@ -139,7 +139,7 @@ Holistic: Enter stocks within your current portfolio. After doing so, you may en
 ## Step 4: User is able to provide as many stocks as required either via manual entry or CSV upload.
 
 ### If CSV upload, the file should follow the following format:
-```
+```sh
 id,Company Name,Ticker,Sector
 1,"Apple, Inc.",AAPL,TECHNOLOGY
 2,"Facebook, Inc.",FB,TECHNOLOGY

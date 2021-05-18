@@ -113,8 +113,6 @@ Install package dependencies:
 pip install -r requirements.txt
 ```
 
-```
-
 # Usage 
 
 ## Step 1: Run the program: - the specific run abbreviated command is as follows:
